@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BuildWidget.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">BuildWidget.java</span></div><h1>BuildWidget.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jessies.dalvikexplorer;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.Context;
+import android.content.Intent;
+import android.text.format.DateFormat;
+import android.widget.RemoteViews;
+
+<span class="nc" id="L27">public class BuildWidget extends AppWidgetProvider {</span>
+  @Override public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    for (int appWidgetId : appWidgetIds) {</span>
+<span class="nc" id="L30">      updateAppWidget(context, appWidgetManager, appWidgetId);</span>
+    }
+<span class="nc" id="L32">  }</span>
+
+  public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+<span class="nc" id="L35">    RemoteViews updateViews = new RemoteViews(context.getPackageName(), R.layout.build_widget);</span>
+
+<span class="nc" id="L37">    PendingIntent pendingIntent = PendingIntent.getActivity(context,</span>
+                                                            0 /* no requestCode */,
+                                                            new Intent(&quot;android.settings.SYSTEM_UPDATE_SETTINGS&quot;),
+                                                            0 /* no flags */);
+<span class="nc" id="L41">    updateViews.setOnClickPendingIntent(R.id.widget, pendingIntent);</span>
+
+<span class="nc" id="L43">    updateViews.setTextViewText(R.id.build_info, android.os.Build.ID);</span>
+<span class="nc" id="L44">    updateViews.setTextViewText(R.id.build_product, android.os.Build.PRODUCT);</span>
+<span class="nc" id="L45">    updateViews.setTextViewText(R.id.build_type, android.os.Build.TYPE);</span>
+<span class="nc" id="L46">    updateViews.setTextViewText(R.id.build_date, DateFormat.format(&quot;yyyy-MM-dd&quot;, android.os.Build.TIME));</span>
+
+<span class="nc" id="L48">    appWidgetManager.updateAppWidget(appWidgetId, updateViews);</span>
+<span class="nc" id="L49">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

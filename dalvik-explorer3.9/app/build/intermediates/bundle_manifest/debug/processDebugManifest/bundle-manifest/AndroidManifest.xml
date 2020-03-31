@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.jessies.dalvikexplorer"
+    android:versionCode="39"
+    android:versionName="3.9" >
+
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <!-- for GoogleTV -->
+    <application
+        android:allowBackup="true"
+        android:debuggable="true"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.App" >
+        <activity
+            android:name="org.jessies.dalvikexplorer.DalvikExplorerActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name="org.jessies.dalvikexplorer.BuildWidget"
+            android:label="Build Widget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/build_widget_provider_info" />
+        </receiver>
+
+        <activity android:name="org.jessies.dalvikexplorer.BuildActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.CharsetsActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.CharsetActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.DeviceActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.EnvironmentVariablesActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.FileSystemsActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.FileSystemActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.FileViewerActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.LocalesActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.LocaleCountriesActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.LocaleActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.SensorsActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.SystemPropertiesActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.TimeZonesActivity" />
+        <activity android:name="org.jessies.dalvikexplorer.TimeZoneActivity" />
+    </application>
+
+</manifest>

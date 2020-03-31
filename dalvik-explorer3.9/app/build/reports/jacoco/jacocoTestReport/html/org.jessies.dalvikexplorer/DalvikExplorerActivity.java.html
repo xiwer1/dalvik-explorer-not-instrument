@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DalvikExplorerActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">DalvikExplorerActivity.java</span></div><h1>DalvikExplorerActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.app.ListActivity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ListView;
+import org.jessies.dalvikexplorer.test.JacocoUtils;
+import org.jessies.dalvikexplorer.test.MyThread;
+
+import java.util.Arrays;
+import java.util.TimerTask;
+import java.util.Timer;
+
+import static android.content.ContentValues.TAG;
+
+<span class="fc" id="L21">public class DalvikExplorerActivity extends ListActivity {</span>
+  // A (list view label, activity class) pair.
+
+  // Thread jacocoThread = new MyThread();
+
+  private static class NamedActivity {
+    private final String name;
+    private final Class&lt;?&gt; activityClass;
+<span class="fc" id="L29">    private NamedActivity(String name, Class&lt;?&gt; activityClass) {</span>
+<span class="fc" id="L30">      this.name = name;</span>
+<span class="fc" id="L31">      this.activityClass = activityClass;</span>
+<span class="fc" id="L32">    }</span>
+    @Override public String toString() {
+<span class="fc" id="L34">      return name;</span>
+    }
+  }
+
+
+<span class="fc" id="L39">  private static final NamedActivity[] ACTIVITIES = new NamedActivity[] {</span>
+    new NamedActivity(&quot;Build Details&quot;, BuildActivity.class),
+    new NamedActivity(&quot;Charsets&quot;, CharsetsActivity.class),
+    new NamedActivity(&quot;Device Details&quot;, DeviceActivity.class),
+    new NamedActivity(&quot;Environment Variables&quot;, EnvironmentVariablesActivity.class),
+    new NamedActivity(&quot;File Systems&quot;, FileSystemsActivity.class),
+    new NamedActivity(&quot;Locales&quot;, LocalesActivity.class),
+    new NamedActivity(&quot;Sensors&quot;, SensorsActivity.class),
+    new NamedActivity(&quot;System Properties&quot;, SystemPropertiesActivity.class),
+    new NamedActivity(&quot;Time Zones&quot;, TimeZonesActivity.class)
+  };
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L52">    super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L53">    setListAdapter(new BetterArrayAdapter&lt;NamedActivity&gt;(this, Arrays.asList(ACTIVITIES), false));</span>
+
+<span class="fc" id="L55">    String title = &quot;Dalvik Explorer&quot;;</span>
+    try {
+<span class="fc" id="L57">      title += &quot; &quot; + getPackageManager().getPackageInfo(getPackageName(), 0).versionName;</span>
+<span class="nc" id="L58">    } catch (PackageManager.NameNotFoundException ignored) {</span>
+<span class="fc" id="L59">    }</span>
+<span class="fc" id="L60">    setTitle(title);</span>
+
+    // jacocoThread.start();
+<span class="fc" id="L63">  }</span>
+
+  @Override protected void onListItemClick(ListView l, View v, int position, long id) {
+<span class="fc" id="L66">    final NamedActivity destinationActivity = ACTIVITIES[position];</span>
+<span class="fc" id="L67">    startActivity(new Intent(this, destinationActivity.activityClass));</span>
+<span class="fc" id="L68">  }</span>
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    if (keyCode == KeyEvent.KEYCODE_0) {</span>
+<span class="fc" id="L73">      Timer timer = new Timer();</span>
+<span class="fc" id="L74">      TimerTask timerTask = new TimerTask() {</span>
+        @Override
+        public void run() {
+<span class="fc" id="L77">          JacocoUtils.generateEcFile(true);</span>
+<span class="fc" id="L78">        }</span>
+      };
+<span class="fc" id="L80">      timer.schedule(timerTask, 1000, 1000*60*2);</span>
+<span class="fc" id="L81">      return super.onKeyDown(keyCode, event);</span>
+    }
+    else{
+<span class="fc" id="L84">      return super.onKeyDown(keyCode, event);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

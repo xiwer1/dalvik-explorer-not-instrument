@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CharsetActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">CharsetActivity.java</span></div><h1>CharsetActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import java.nio.charset.Charset;
+import java.util.Set;
+
+<span class="fc" id="L6">public class CharsetActivity extends TextViewActivity {</span>
+  protected String extraName() {
+<span class="fc" id="L8">    return &quot;org.jessies.dalvikexplorer.Charset&quot;;</span>
+  }
+
+  protected CharSequence title(String charsetName) {
+<span class="fc" id="L12">    return &quot;Charset \&quot;&quot; + charsetName + &quot;\&quot;&quot;;</span>
+  }
+
+  protected String content(String charsetName) {
+<span class="fc" id="L16">    return describeCharset(charsetName);</span>
+  }
+
+  static String describeCharset(String name) {
+<span class="fc" id="L20">    final StringBuilder result = new StringBuilder();</span>
+<span class="fc" id="L21">    result.append(&quot;&lt;html&gt;&quot;);</span>
+<span class="fc" id="L22">    final Charset charset = Charset.forName(name);</span>
+<span class="fc" id="L23">    append(result, &quot;Canonical Name&quot;, charset.name());</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">    if (!charset.displayName().equals(charset.name())) {</span>
+<span class="nc" id="L25">      append(result, &quot;Display Name&quot;, charset.displayName());</span>
+    }
+
+<span class="fc" id="L28">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="fc" id="L29">    append(result, &quot;Can Encode&quot;, charset.canEncode());</span>
+<span class="fc" id="L30">    append(result, &quot;IANA Registered&quot;, charset.isRegistered());</span>
+
+<span class="fc" id="L32">    Set&lt;String&gt; aliases = charset.aliases();</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">    if (aliases.size() &gt; 0) {</span>
+<span class="fc" id="L34">      result.append(&quot;&lt;p&gt;&lt;b&gt;Aliases&lt;/b&gt;\n&quot;);</span>
+<span class="fc" id="L35">      result.append(Utils.sortedStringOfStrings(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;, aliases));</span>
+    }
+<span class="fc" id="L37">    return result.toString();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

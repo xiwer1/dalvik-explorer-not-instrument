@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JacocoUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer.test</a> &gt; <span class="el_source">JacocoUtils.java</span></div><h1>JacocoUtils.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer.test;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
+import java.io.DataInput;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
+
+<span class="nc" id="L17">public class JacocoUtils {</span>
+<span class="fc" id="L18">    static String TAG = &quot;JacocoUtils&quot;;</span>
+
+    //ec鏂囦欢鐨勮矾寰�
+<span class="fc" id="L21">    private static String DEFAULT_COVERAGE_FILE_PATH = &quot;/mnt/sdcard/Pictures/coverage.ec&quot;;</span>
+
+    /**
+     * 鐢熸垚ec鏂囦欢
+     *
+     * @param isNew 鏄惁閲嶆柊鍒涘缓ec鏂囦欢
+     */
+    public static void generateEcFile(boolean isNew) {
+<span class="fc" id="L29">        String currentTimeStr = String.valueOf(System.currentTimeMillis());</span>
+<span class="fc" id="L30">        DEFAULT_COVERAGE_FILE_PATH = &quot;/mnt/sdcard/Pictures/coverage&quot; + currentTimeStr + &quot;.ec&quot;;</span>
+<span class="fc" id="L31">        Log.d(TAG, &quot;鐢熸垚瑕嗙洊鐜囨枃浠�: &quot; + DEFAULT_COVERAGE_FILE_PATH);</span>
+<span class="fc" id="L32">        OutputStream out = null;</span>
+<span class="fc" id="L33">        File mCoverageFilePath = new File(DEFAULT_COVERAGE_FILE_PATH);</span>
+
+        //create and delete coverage.ec
+        try {
+<span class="pc bpc" id="L37" title="2 of 4 branches missed.">            if (isNew &amp;&amp; mCoverageFilePath.exists()) {</span>
+<span class="nc" id="L38">                Log.d(TAG, &quot;JacocoUtils_generateEcFile: 娓呴櫎鏃х殑ec鏂囦欢&quot;);</span>
+                // mCoverageFilePath.delete();
+            }
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">            if (!mCoverageFilePath.exists()) {</span>
+<span class="fc" id="L42">                mCoverageFilePath.createNewFile();</span>
+            }
+<span class="fc" id="L44">            out = new FileOutputStream(mCoverageFilePath.getPath(), true);</span>
+
+            //鍙嶅皠锛氳幏鍙杘rg.jacoco.agent.rt.IAgent
+<span class="fc" id="L47">            Object agent = Class.forName(&quot;org.jacoco.agent.rt.RT&quot;   )</span>
+<span class="fc" id="L48">                    .getMethod(&quot;getAgent&quot;)</span>
+<span class="fc" id="L49">                    .invoke(null);</span>
+
+            //鍙嶅皠锛歡etExecutionData(boolean reset)锛岃幏鍙栧綋鍓嶆墽琛屾暟鎹紝浠acoco浜岃繘鍒舵牸寮忚浆鍌ㄥ綋鍓嶆墽琛屾暟鎹�
+            // getExecutionData(boolean reset)锛宺eset濡傛灉涓簍rue锛屽垯涔嬪悗娓呴櫎褰撳墠鎵ц鏁版嵁
+<span class="fc" id="L53">            out.write((byte[]) agent.getClass().getMethod(&quot;getExecutionData&quot;, boolean.class)</span>
+<span class="fc" id="L54">                    .invoke(agent, false))  ;</span>
+
+<span class="nc" id="L56">        } catch (Exception e) {</span>
+<span class="nc" id="L57">            Log.e(TAG, &quot;generateEcFile: &quot; + e.getMessage());</span>
+        } finally {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">            if (out == null)</span>
+<span class="nc" id="L60">                return;</span>
+            try {
+<span class="fc" id="L62">                out.close();</span>
+<span class="nc" id="L63">            } catch (IOException e) {</span>
+<span class="nc" id="L64">                e.printStackTrace();</span>
+<span class="fc" id="L65">            }</span>
+        }
+<span class="fc" id="L67">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

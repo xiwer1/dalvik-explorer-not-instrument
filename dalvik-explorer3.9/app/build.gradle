@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+task jacocoTestReport(type: JacocoReport) {
+    def lineList = new File(project.rootDir.toString() + '/settings.gradle').readLines()
+    def coverageCompName = []
+    for (i in lineList) {
+        if (!i.isEmpty() && i.contains('include')) {
+            coverageCompName.add(project.rootDir.toString() + '/' + i.split(':')[1].replace("'", '') + '/')
+        }
+    }
+
+    def coverageSourceCompName = []
+    for (i in lineList) {
+        if (!i.isEmpty() && i.contains('include')) {
+            coverageSourceCompName.add('../' + i.split(':')[1].replace("'", '') + '/')
+        }
+    }
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    def fileFilter = ['**/R*.class',
+                      '**/*$InjectAdapter.class',
+                      '**/*$ModuleAdapter.class',
+                      '**/*$ViewInjector*.class',
+                      '**/*Binding*.class',
+                      '**/*BR*.class'
+    ]
+
+    def coverageSourceDirs = []
+    for (i in coverageSourceCompName) {
+        def sourceDir = i + './src/main/java'
+        coverageSourceDirs.add(sourceDir)
+    }
+
+    def coverageClassDirs = []
+    for (i in coverageCompName) {
+        def classDir = fileTree(dir: i + './build/intermediates/javac/debug/classes', excludes: fileFilter)
+        coverageClassDirs.add(classDir)
+    }
+
+    classDirectories = files(coverageClassDirs)
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = fileTree(dir: "$buildDir", includes: [
+            "/outputs/code_coverage/debugAndroidTest/connected/coverage*.ec"
+    ])
+
+    doFirst {
+        new File("$buildDir/intermediates/javac/debug/classes/").eachFileRecurse { file ->
+            if (file.name.contains('$$')) {
+                file.renameTo(file.path.replace('$$', '$'))
+            }
+        }
+    }
+}
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+
+    defaultConfig {
+        applicationId "org.jessies.dalvikexplorer"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}

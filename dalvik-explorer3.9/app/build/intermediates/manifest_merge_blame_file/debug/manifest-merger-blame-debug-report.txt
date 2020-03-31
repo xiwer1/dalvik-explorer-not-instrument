@@ -1,0 +1,127 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="org.jessies.dalvikexplorer"
+4    android:versionCode="39"
+5    android:versionName="3.9" >
+6
+7    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+7-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:4:5-74
+7-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:4:22-71
+8    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+8-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:5:5-71
+8-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:5:22-68
+9    <uses-permission android:name="android.permission.READ_PROFILE" />
+9-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:6:5-71
+9-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:6:22-68
+10    <uses-permission android:name="android.permission.READ_CONTACTS" />
+10-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:7:5-72
+10-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:7:22-69
+11    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+11-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:8:5-80
+11-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:8:22-78
+12
+13    <uses-feature
+13-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:10:5-90
+14        android:name="android.hardware.touchscreen"
+14-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:10:19-62
+15        android:required="false" />
+15-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:10:63-87
+16    <!-- for GoogleTV -->
+17    <application
+17-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:11:5-41:19
+18        android:allowBackup="true"
+18-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:11:114-140
+19        android:debuggable="true"
+20        android:icon="@drawable/icon"
+20-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:11:51-80
+21        android:label="@string/app_name"
+21-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:11:18-50
+22        android:theme="@style/Theme.App" >
+22-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:11:81-113
+23        <activity
+23-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:12:9-17:20
+24            android:name="org.jessies.dalvikexplorer.DalvikExplorerActivity"
+24-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:12:19-56
+25            android:label="@string/app_name" >
+25-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:12:57-89
+26            <intent-filter>
+26-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:13:13-16:29
+27                <action android:name="android.intent.action.MAIN" />
+27-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:14:17-69
+27-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:14:25-66
+28
+29                <category android:name="android.intent.category.LAUNCHER" />
+29-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:15:17-77
+29-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:15:27-74
+30            </intent-filter>
+31        </activity>
+32
+33        <receiver
+33-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:19:9-24:20
+34            android:name="org.jessies.dalvikexplorer.BuildWidget"
+34-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:19:19-46
+35            android:label="Build Widget" >
+35-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:19:47-75
+36            <intent-filter>
+36-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:20:13-22:29
+37                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+37-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:21:17-84
+37-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:21:25-81
+38            </intent-filter>
+39
+40            <meta-data
+40-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:23:13-119
+41                android:name="android.appwidget.provider"
+41-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:23:24-65
+42                android:resource="@xml/build_widget_provider_info" />
+42-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:23:66-116
+43        </receiver>
+44
+45        <activity android:name="org.jessies.dalvikexplorer.BuildActivity" />
+45-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:26:9-51
+45-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:26:19-48
+46        <activity android:name="org.jessies.dalvikexplorer.CharsetsActivity" />
+46-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:27:9-54
+46-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:27:19-51
+47        <activity android:name="org.jessies.dalvikexplorer.CharsetActivity" />
+47-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:28:9-53
+47-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:28:19-50
+48        <activity android:name="org.jessies.dalvikexplorer.DeviceActivity" />
+48-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:29:9-52
+48-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:29:19-49
+49        <activity android:name="org.jessies.dalvikexplorer.EnvironmentVariablesActivity" />
+49-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:30:9-66
+49-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:30:19-63
+50        <activity android:name="org.jessies.dalvikexplorer.FileSystemsActivity" />
+50-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:31:9-57
+50-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:31:19-54
+51        <activity android:name="org.jessies.dalvikexplorer.FileSystemActivity" />
+51-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:32:9-56
+51-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:32:19-53
+52        <activity android:name="org.jessies.dalvikexplorer.FileViewerActivity" />
+52-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:33:9-56
+52-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:33:19-53
+53        <activity android:name="org.jessies.dalvikexplorer.LocalesActivity" />
+53-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:34:9-53
+53-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:34:19-50
+54        <activity android:name="org.jessies.dalvikexplorer.LocaleCountriesActivity" />
+54-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:35:9-61
+54-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:35:19-58
+55        <activity android:name="org.jessies.dalvikexplorer.LocaleActivity" />
+55-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:36:9-52
+55-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:36:19-49
+56        <activity android:name="org.jessies.dalvikexplorer.SensorsActivity" />
+56-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:37:9-53
+56-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:37:19-50
+57        <activity android:name="org.jessies.dalvikexplorer.SystemPropertiesActivity" />
+57-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:38:9-62
+57-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:38:19-59
+58        <activity android:name="org.jessies.dalvikexplorer.TimeZonesActivity" />
+58-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:39:9-55
+58-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:39:19-52
+59        <activity android:name="org.jessies.dalvikexplorer.TimeZoneActivity" />
+59-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:40:9-54
+59-->D:\study\Test\GitHub\dalvik-explorer3.9-timer\app\src\main\AndroidManifest.xml:40:19-51
+60    </application>
+61
+62</manifest>

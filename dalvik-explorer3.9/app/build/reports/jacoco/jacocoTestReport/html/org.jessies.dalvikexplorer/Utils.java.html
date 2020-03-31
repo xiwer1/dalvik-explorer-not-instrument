@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Utils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">Utils.java</span></div><h1>Utils.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+<span class="nc" id="L15">public class Utils {</span>
+    // Original in salma-hayek &quot;DebugMenu.java&quot;.
+    public static String sortedStringOfMap(Map&lt;String, String&gt; hash) {
+<span class="fc" id="L18">        StringBuilder builder = new StringBuilder();</span>
+<span class="fc" id="L19">        String[] keys = hash.keySet().toArray(new String[hash.size()]);</span>
+<span class="fc" id="L20">        Arrays.sort(keys);</span>
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        for (String key : keys) {</span>
+<span class="fc" id="L22">            builder.append(key + &quot;=&quot; + hash.get(key) + &quot;\n&quot;);</span>
+        }
+<span class="fc" id="L24">        return builder.toString();</span>
+    }
+
+    public static String sortedStringOfStrings(String prefix, Set&lt;String&gt; strings) {
+<span class="fc" id="L28">        return sortedStringOfStrings(prefix, strings.toArray(new String[strings.size()]));</span>
+    }
+
+    public static String sortedStringOfStrings(String prefix, String[] strings) {
+<span class="fc" id="L32">        String[] sortedStrings = strings.clone();</span>
+<span class="fc" id="L33">        Arrays.sort(sortedStrings, String.CASE_INSENSITIVE_ORDER);</span>
+<span class="fc" id="L34">        StringBuilder result = new StringBuilder();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        for (String s : sortedStrings) {</span>
+<span class="fc" id="L36">            result.append(prefix).append(s).append(&quot;\n&quot;);</span>
+        }
+<span class="fc" id="L38">        return result.toString();</span>
+    }
+
+    // Original in salma-hayek &quot;StringUtilities.java&quot;.
+    public static String escapeForJava(CharSequence s) {
+<span class="fc" id="L43">        final int sLength = s.length();</span>
+<span class="fc" id="L44">        final StringBuilder result = new StringBuilder(sLength);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (int i = 0; i &lt; sLength; ++i) {</span>
+<span class="fc" id="L46">            final char c = s.charAt(i);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if (c == '\\') {</span>
+<span class="nc" id="L48">                result.append(&quot;\\\\&quot;);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">            } else if (c == '\n') {</span>
+<span class="fc" id="L50">                result.append(&quot;\\n&quot;);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            } else if (c == '\r') {</span>
+<span class="nc" id="L52">                result.append(&quot;\\r&quot;);</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            } else if (c == '\t') {</span>
+<span class="nc" id="L54">                result.append(&quot;\\t&quot;);</span>
+<span class="pc bpc" id="L55" title="2 of 4 branches missed.">            } else if (c &lt; ' ' || c &gt; '~') {</span>
+<span class="nc" id="L56">                result.append(String.format(&quot;\\u%04x&quot;, c)); // android-changed.</span>
+            } else {
+<span class="fc" id="L58">                result.append(c);</span>
+            }
+        }
+<span class="fc" id="L61">        return result.toString();</span>
+    }
+
+    // Original in salma-hayek &quot;StringUtilities.java&quot;.
+    public static String join(CharSequence[] strings, CharSequence separator) {
+<span class="nc" id="L66">        StringBuilder result = new StringBuilder();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for (CharSequence string : strings) {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (result.length() &gt; 0) {</span>
+<span class="nc" id="L69">                result.append(separator);</span>
+            }
+<span class="nc" id="L71">            result.append(string);</span>
+        }
+<span class="nc" id="L73">        return result.toString();</span>
+    }
+
+    public static String offsetString(int ms, boolean showHours, boolean showMinutes) {
+<span class="fc" id="L77">        int minutes = ms/1000/60;</span>
+<span class="fc" id="L78">        String result = &quot;&quot;;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (showHours) {</span>
+<span class="fc" id="L80">            result += String.format(Locale.US, &quot;%+03d:%02d&quot;, minutes / 60, Math.abs(minutes % 60));</span>
+        }
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (showMinutes) {</span>
+<span class="fc bfc" id="L83" title="All 4 branches covered.">            result += String.format(Locale.US, &quot;%s%+d minutes%s&quot;, showHours ? &quot; (&quot; : &quot;&quot;, minutes, showHours ? &quot;)&quot; : &quot;&quot;);</span>
+        }
+<span class="fc" id="L85">        return result;</span>
+    }
+
+    public static String appVersion(Context context) {
+<span class="fc" id="L89">        String version = &quot;unknown&quot;;</span>
+        try {
+<span class="fc" id="L91">            String packageName = context.getPackageName();</span>
+<span class="fc" id="L92">            version = context.getPackageManager().getPackageInfo(packageName, 0).versionName;</span>
+<span class="nc" id="L93">        } catch (NameNotFoundException ignored) {</span>
+<span class="fc" id="L94">        }</span>
+<span class="fc" id="L95">        return version;</span>
+    }
+
+  public static String readFile(String path) {
+<span class="fc" id="L99">    StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    for (String line : readLines(path)) {</span>
+<span class="fc" id="L101">      sb.append(line).append('\n');</span>
+    }
+<span class="fc" id="L103">    return sb.toString();</span>
+  }
+
+  public static String[] readLines(String path) {
+<span class="fc" id="L107">    ArrayList&lt;String&gt; lines = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L108">    BufferedReader in = null;</span>
+    try {
+<span class="fc" id="L110">      in = new BufferedReader(new FileReader(path));</span>
+      String line;
+<span class="fc bfc" id="L112" title="All 2 branches covered.">      while ((line = in.readLine()) != null) {</span>
+<span class="fc" id="L113">        lines.add(line);</span>
+      }
+<span class="fc" id="L115">      return lines.toArray(new String[0]);</span>
+<span class="nc" id="L116">    } catch (IOException ex) {</span>
+<span class="nc" id="L117">      return null;</span>
+    } finally {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">      if (in != null) {</span>
+        try {
+<span class="fc" id="L121">          in.close();</span>
+<span class="nc" id="L122">        } catch (IOException ignored) {</span>
+<span class="fc" id="L123">        }</span>
+      }
+    }
+  }
+
+  public static String prettySize(long bytes) {
+<span class="fc" id="L129">    String unit = &quot;&quot;;</span>
+<span class="fc" id="L130">    double n = bytes;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">    if (n &gt; 1024) {</span>
+<span class="fc" id="L132">      n /= 1024;</span>
+<span class="fc" id="L133">      unit = &quot;Ki&quot;;</span>
+    }
+<span class="fc bfc" id="L135" title="All 2 branches covered.">    if (n &gt; 1024) {</span>
+<span class="fc" id="L136">      n /= 1024;</span>
+<span class="fc" id="L137">      unit = &quot;Mi&quot;;</span>
+    }
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (n &gt; 1024) {</span>
+<span class="fc" id="L140">      n /= 1024;</span>
+<span class="fc" id="L141">      unit = &quot;Gi&quot;;</span>
+    }
+<span class="fc" id="L143">    return String.format(&quot;%.1f %sB&quot;, n, unit);</span>
+  }
+
+  public static String prettyHz(long hz) {
+<span class="fc" id="L147">    String unit = &quot;&quot;;</span>
+<span class="fc" id="L148">    double n = hz;</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">    if (n &gt; 1000) {</span>
+<span class="fc" id="L150">      n /= 1000;</span>
+<span class="fc" id="L151">      unit = &quot;K&quot;;</span>
+    }
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">    if (n &gt; 1000) {</span>
+<span class="fc" id="L154">      n /= 1000;</span>
+<span class="fc" id="L155">      unit = &quot;M&quot;;</span>
+    }
+<span class="fc bfc" id="L157" title="All 2 branches covered.">    if (n &gt; 1000) {</span>
+<span class="fc" id="L158">      n /= 1000;</span>
+<span class="fc" id="L159">      unit = &quot;G&quot;;</span>
+    }
+<span class="fc" id="L161">    return String.format(&quot;%.1f %sHz&quot;, n, unit);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

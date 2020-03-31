@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Compatibility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">Compatibility.java</span></div><h1>Compatibility.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.app.Activity;
+import android.app.ListActivity;
+import android.os.Build;
+import android.view.Menu;
+import android.widget.ListView;
+import android.widget.SearchView;
+
+import java.io.File;
+
+<span class="fc" id="L12">public abstract class Compatibility {</span>
+  public static Compatibility get() {
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {</span>
+<span class="fc" id="L15">      return new IceCreamSandwichCompatibility();</span>
+<span class="nc bnc" id="L16" title="All 2 branches missed.">    } else if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.HONEYCOMB) {</span>
+<span class="nc" id="L17">      return new HoneycombCompatibility();</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">    } else if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.GINGERBREAD) {</span>
+<span class="nc" id="L19">      return new GingerbreadCompatibility();</span>
+    } else {
+<span class="nc" id="L21">      return new PreGingerbreadCompatibility();</span>
+    }
+  }
+
+  public abstract void configureActionBar(Activity activity);
+  public abstract void configureFastScroll(ListView listView);
+  public abstract void configureSearchView(ListActivity listActivity, Menu menu);
+  public abstract void configureSearchView(TextViewActivity textViewActivity, Menu menu);
+  public abstract String describeFs(String mountPoint, String type);
+  public abstract boolean isInterestingFileSystem(String mountPoint);
+
+<span class="fc" id="L32">  public static class PreGingerbreadCompatibility extends Compatibility {</span>
+    public void configureActionBar(Activity activity) {
+      // Nothing to do, since there was no ActionBar pre-honeycomb.
+<span class="nc" id="L35">    }</span>
+    public void configureFastScroll(ListView listView) {
+<span class="nc" id="L37">      listView.setFastScrollEnabled(true);</span>
+<span class="nc" id="L38">    }</span>
+    public void configureSearchView(ListActivity listActivity, Menu menu) {
+      // Nothing to do, since a SearchView couldn't possibly exist pre-honeycomb.
+<span class="nc" id="L41">    }</span>
+    public void configureSearchView(TextViewActivity textViewActivity, Menu menu) {
+      // Nothing to do, since a SearchView couldn't possibly exist pre-honeycomb.
+<span class="nc" id="L44">    }</span>
+    public String describeFs(String mountPoint, String type) {
+      // Pre-Gingerbread we couldn't statfs(3) in a portable way.
+<span class="nc" id="L47">      return &quot;(&quot; + type + &quot;)&quot;;</span>
+    }
+    public boolean isInterestingFileSystem(String mountPoint) {
+      // Pre-Gingerbread we couldn't statfs(3) in a portable way.
+<span class="nc" id="L51">      return true;</span>
+    }
+  }
+
+<span class="fc" id="L55">  public static class GingerbreadCompatibility extends PreGingerbreadCompatibility {</span>
+    public String describeFs(String mountPoint, String type) {
+<span class="fc" id="L57">      File f = new File(mountPoint);</span>
+<span class="fc" id="L58">      long totalBytes = f.getTotalSpace();</span>
+<span class="fc" id="L59">      long freeBytes = f.getFreeSpace();</span>
+<span class="fc" id="L60">      long usedBytes = totalBytes - freeBytes;</span>
+<span class="fc" id="L61">      return Utils.prettySize(usedBytes) + &quot; of &quot; + Utils.prettySize(totalBytes) + &quot; used (&quot; + type + &quot;)&quot;;</span>
+    }
+    public boolean isInterestingFileSystem(String mountPoint) {
+<span class="fc" id="L64">      File f = new File(mountPoint);</span>
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">      return (f.getTotalSpace() &gt; 0 || mountPoint.equals(&quot;/&quot;));</span>
+    }
+  }
+
+<span class="fc" id="L69">  public static class HoneycombCompatibility extends GingerbreadCompatibility {</span>
+    @Override public void configureFastScroll(ListView listView) {
+<span class="fc" id="L71">      listView.setFastScrollEnabled(true);</span>
+<span class="fc" id="L72">      listView.setFastScrollAlwaysVisible(true);</span>
+<span class="fc" id="L73">    }</span>
+
+    @Override public void configureSearchView(final ListActivity listActivity, Menu menu) {
+<span class="fc" id="L76">      SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();</span>
+<span class="fc" id="L77">      searchView.setSubmitButtonEnabled(false);</span>
+<span class="fc" id="L78">      searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {</span>
+        public boolean onQueryTextChange(String newText) {
+<span class="nc" id="L80">          listActivity.getListView().setFilterText(newText);</span>
+<span class="nc" id="L81">          return true;</span>
+        }
+        public boolean onQueryTextSubmit(String query) {
+          // We've been filtering as we go, so there's nothing to do here.
+<span class="nc" id="L85">          return true;</span>
+        }
+      });
+<span class="fc" id="L88">      searchView.setOnCloseListener(new SearchView.OnCloseListener() {</span>
+        public boolean onClose() {
+<span class="fc" id="L90">          listActivity.getListView().clearTextFilter();</span>
+<span class="fc" id="L91">          return false;</span>
+        }
+      });
+<span class="fc" id="L94">    }</span>
+
+    @Override public void configureSearchView(final TextViewActivity textViewActivity, Menu menu) {
+<span class="fc" id="L97">      SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();</span>
+<span class="fc" id="L98">      searchView.setSubmitButtonEnabled(false);</span>
+<span class="fc" id="L99">      searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {</span>
+        public boolean onQueryTextChange(String newText) {
+<span class="nc" id="L101">          textViewActivity.setSearchString(newText);</span>
+<span class="nc" id="L102">          return true;</span>
+        }
+        public boolean onQueryTextSubmit(String query) {
+          // We've been filtering as we go, so there's nothing to do here.
+<span class="nc" id="L106">          return true;</span>
+        }
+      });
+<span class="fc" id="L109">      searchView.setOnCloseListener(new SearchView.OnCloseListener() {</span>
+        public boolean onClose() {
+<span class="fc" id="L111">          textViewActivity.clearSearch();</span>
+<span class="fc" id="L112">          return false;</span>
+        }
+      });
+<span class="fc" id="L115">    }</span>
+  }
+
+<span class="fc" id="L118">  public static class IceCreamSandwichCompatibility extends HoneycombCompatibility {</span>
+    @Override public void configureActionBar(Activity activity) {
+<span class="fc" id="L120">      activity.getActionBar().setHomeButtonEnabled(true);</span>
+<span class="fc" id="L121">    }</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

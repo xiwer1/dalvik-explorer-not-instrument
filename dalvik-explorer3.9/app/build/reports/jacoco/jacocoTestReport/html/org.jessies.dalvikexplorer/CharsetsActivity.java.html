@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CharsetsActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">CharsetsActivity.java</span></div><h1>CharsetsActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+<span class="fc" id="L13">public class CharsetsActivity extends BetterListActivity {</span>
+    private static class CharsetListItem implements Comparable&lt;CharsetListItem&gt;, BetterArrayAdapter.Subtitleable {
+        private final String alias;
+        private final Charset charset;
+        
+<span class="fc" id="L18">        private CharsetListItem(String alias, Charset charset) {</span>
+<span class="fc" id="L19">            this.alias = alias;</span>
+<span class="fc" id="L20">            this.charset = charset;</span>
+<span class="fc" id="L21">        }</span>
+        
+        public int compareTo(CharsetListItem o) {
+<span class="fc" id="L24">            return String.CASE_INSENSITIVE_ORDER.compare(alias, o.alias);</span>
+        }
+        
+        @Override public String toString() {
+<span class="fc" id="L28">            String result = alias;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            if (alias.equals(Charset.defaultCharset().name())) {</span>
+<span class="fc" id="L30">                result += &quot; (default)&quot;;</span>
+            }
+<span class="fc" id="L32">            return result;</span>
+        }
+        
+        @Override public String toSubtitle() {
+<span class="fc" id="L36">            String canonicalName = charset.name();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (alias.equals(canonicalName)) {</span>
+<span class="fc" id="L38">                return &quot;Canonical&quot;;</span>
+            }
+<span class="nc" id="L40">            return &quot;Alias for &quot; + canonicalName;</span>
+        }
+    }
+<span class="fc" id="L43">    private static final List&lt;CharsetListItem&gt; CHARSETS = gatherCharsets();</span>
+    
+    @Override public void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L46">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L47">        setListAdapter(new BetterArrayAdapter&lt;CharsetListItem&gt;(this, CHARSETS, true));</span>
+<span class="fc" id="L48">        setTitle(&quot;Charsets (&quot; + CHARSETS.size() + &quot;)&quot;);</span>
+<span class="fc" id="L49">    }</span>
+    
+    @Override protected void onListItemClick(ListView l, View v, int position, long id) {
+<span class="fc" id="L52">        final Intent intent = new Intent(this, CharsetActivity.class);</span>
+<span class="fc" id="L53">        final CharsetListItem item = (CharsetListItem) l.getAdapter().getItem(position);</span>
+<span class="fc" id="L54">        intent.putExtra(&quot;org.jessies.dalvikexplorer.Charset&quot;, item.charset.name());</span>
+<span class="fc" id="L55">        startActivity(intent);</span>
+<span class="fc" id="L56">    }</span>
+    
+    private static List&lt;CharsetListItem&gt; gatherCharsets() {
+        // Collect the canonical charsets...
+<span class="fc" id="L60">        final List&lt;CharsetListItem&gt; canonicalCharsets = new ArrayList&lt;CharsetListItem&gt;();</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        for (Charset charset : Charset.availableCharsets().values()) {</span>
+<span class="fc" id="L62">            canonicalCharsets.add(new CharsetListItem(charset.name(), charset));</span>
+<span class="fc" id="L63">        }</span>
+<span class="fc" id="L64">        Collections.sort(canonicalCharsets);</span>
+        
+        // ...and their aliases.
+<span class="fc" id="L67">        final List&lt;CharsetListItem&gt; aliases = new ArrayList&lt;CharsetListItem&gt;();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (Charset charset : Charset.availableCharsets().values()) {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            for (String alias : charset.aliases()) {</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                if (!Charset.forName(alias).name().equals(alias)) {</span>
+<span class="fc" id="L71">                    aliases.add(new CharsetListItem(alias, charset));</span>
+                }
+<span class="fc" id="L73">            }</span>
+<span class="fc" id="L74">        }</span>
+<span class="fc" id="L75">        Collections.sort(aliases);</span>
+        
+        // Stitch everything together. Default first, then canonical, then the rest.
+<span class="fc" id="L78">        final List&lt;CharsetListItem&gt; result = new ArrayList&lt;CharsetListItem&gt;();</span>
+<span class="fc" id="L79">        final Charset defaultCharset = Charset.defaultCharset();</span>
+<span class="fc" id="L80">        result.add(0, new CharsetListItem(defaultCharset.name(), defaultCharset));</span>
+<span class="fc" id="L81">        result.addAll(canonicalCharsets);</span>
+<span class="fc" id="L82">        result.addAll(aliases);</span>
+<span class="fc" id="L83">        return result;</span>
+    }
+    
+    static String describeCharsets() {
+<span class="nc" id="L87">        StringBuilder result = new StringBuilder();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (CharsetListItem item : gatherCharsets()) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (Thread.currentThread().isInterrupted()) return null;</span>
+<span class="nc" id="L90">            result.append(CharsetActivity.describeCharset(item.charset.name()));</span>
+<span class="nc" id="L91">            result.append('\n');</span>
+<span class="nc" id="L92">        }</span>
+<span class="nc" id="L93">        return result.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

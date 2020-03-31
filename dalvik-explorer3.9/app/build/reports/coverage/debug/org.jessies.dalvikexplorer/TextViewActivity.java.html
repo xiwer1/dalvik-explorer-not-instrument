@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextViewActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debugAndroidTest</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">TextViewActivity.java</span></div><h1>TextViewActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.text.ClipboardManager;
+import android.text.Editable;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
+import android.text.util.Linkify;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * An abstract superclass for our TextView-based activities.
+ */
+<span class="nc" id="L28">public abstract class TextViewActivity extends Activity {</span>
+    private static final int CONTEXT_MENU_COPY = 0;
+    private static final int CONTEXT_MENU_MAIL = 1;
+
+<span class="nc" id="L32">    static public class GeoFilter implements Linkify.MatchFilter, Linkify.TransformFilter {</span>
+<span class="nc" id="L33">        private static final Pattern GEO_PATTERN = Pattern.compile(&quot;\\+?(-?\\d+)\u00b0(\\d+)'(\\d+)?\&quot;?, \\+?(-?\\d+)\u00b0(\\d+)'(\\d+)?\&quot;?&quot;);</span>
+
+        private static final String GEO_SCHEME = &quot;geo:&quot;;
+
+        public String transformUrl(Matcher m, String url) {
+<span class="nc" id="L38">            return fromDms(m, 1, 2, 3) + &quot;,&quot; + fromDms(m, 4, 5, 6) + &quot;?z=7&quot;;</span>
+        }
+
+        public boolean acceptMatch(CharSequence s, int start, int end) {
+<span class="nc" id="L42">            return true;</span>
+        }
+
+        private static double fromDms(Matcher matcher, int d, int m, int s) {
+<span class="nc" id="L46">            int dd = Integer.parseInt(matcher.group(d), 10);</span>
+<span class="nc" id="L47">            int mm = Integer.parseInt(matcher.group(m), 10);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            int ss = (matcher.group(s) == null) ? 0 : Integer.parseInt(matcher.group(s), 10);</span>
+<span class="nc" id="L49">            return Math.signum(dd) * (Math.abs(dd) + mm/60.0 + ss/3600.0);</span>
+        }
+    }
+
+    @Override public void onCreate(Bundle savedInstanceState) {
+<span class="nc" id="L54">        super.onCreate(savedInstanceState);</span>
+<span class="nc" id="L55">        setContentView(R.layout.main);</span>
+
+<span class="nc" id="L57">        final TextView textView = (TextView) findViewById(R.id.output);</span>
+<span class="nc" id="L58">        registerForContextMenu(textView);</span>
+
+<span class="nc" id="L60">        final String extraValue = getExtraValue();</span>
+<span class="nc" id="L61">        String content = content(extraValue);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (content.startsWith(&quot;&lt;html&gt;&quot;)) {</span>
+<span class="nc" id="L63">          textView.setText(Html.fromHtml(content), TextView.BufferType.SPANNABLE);</span>
+        } else {
+<span class="nc" id="L65">          textView.setText(content, TextView.BufferType.SPANNABLE);</span>
+        }
+<span class="nc" id="L67">        setTitle(title(extraValue));</span>
+
+<span class="nc" id="L69">        Linkify.addLinks(textView, GeoFilter.GEO_PATTERN, GeoFilter.GEO_SCHEME, new GeoFilter(), new GeoFilter());</span>
+
+<span class="nc" id="L71">        final EditText searchView = (EditText) findViewById(R.id.search);</span>
+<span class="nc" id="L72">        searchView.addTextChangedListener(new TextWatcher() {</span>
+            public void afterTextChanged(Editable s) {
+<span class="nc" id="L74">                setSearchString(s.toString());</span>
+<span class="nc" id="L75">            }</span>
+<span class="nc" id="L76">            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }</span>
+<span class="nc" id="L77">            public void onTextChanged(CharSequence s, int start, int before, int count) { }</span>
+        });
+<span class="nc" id="L79">    }</span>
+
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
+<span class="nc" id="L82">        getMenuInflater().inflate(R.menu.options, menu);</span>
+<span class="nc" id="L83">        Compatibility compatibility = Compatibility.get();</span>
+<span class="nc" id="L84">        compatibility.configureActionBar(this);</span>
+<span class="nc" id="L85">        compatibility.configureSearchView(this, menu);</span>
+<span class="nc" id="L86">        return true;</span>
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+<span class="nc bnc" id="L90" title="All 3 branches missed.">        switch (item.getItemId()) {</span>
+        case android.R.id.home:
+<span class="nc" id="L92">            Intent intent = new Intent(this, DalvikExplorerActivity.class);</span>
+<span class="nc" id="L93">            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);</span>
+<span class="nc" id="L94">            startActivity(intent);</span>
+<span class="nc" id="L95">            return true;</span>
+        case R.id.menu_search:
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {</span>
+<span class="nc" id="L98">                final EditText searchView = (EditText) findViewById(R.id.search);</span>
+<span class="nc" id="L99">                searchView.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L100">                searchView.requestFocus();</span>
+            }
+<span class="nc" id="L102">            return true;</span>
+        default:
+<span class="nc" id="L104">            return super.onOptionsItemSelected(item);</span>
+        }
+    }
+
+    protected String extraName() {
+<span class="nc" id="L109">        return null;</span>
+    }
+
+    protected abstract CharSequence title(String extraValue);
+
+    protected abstract String content(String extraValue);
+
+    protected static void append(StringBuilder sb, CharSequence key, Object value) {
+<span class="nc" id="L117">      sb.append(&quot;&lt;b&gt;&quot;);</span>
+<span class="nc" id="L118">      sb.append(key);</span>
+<span class="nc" id="L119">      sb.append(&quot;:&lt;/b&gt; &quot;);</span>
+<span class="nc" id="L120">      sb.append(value);</span>
+<span class="nc" id="L121">      sb.append(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc" id="L122">    }</span>
+
+    protected String getExtraValue() {
+<span class="nc" id="L125">        final String extraName = extraName();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        return (extraName != null) ? getIntent().getStringExtra(extraName) : null;</span>
+    }
+
+    @Override public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+<span class="nc" id="L130">        super.onCreateContextMenu(menu, v, menuInfo);</span>
+<span class="nc" id="L131">        menu.setHeaderTitle(&quot;Details&quot;);</span>
+<span class="nc" id="L132">        menu.add(0, CONTEXT_MENU_COPY,  0, &quot;Copy to clipboard&quot;); // &quot;Copy&quot; might be ambiguous in FileViewerActivity.</span>
+<span class="nc" id="L133">        menu.add(0, CONTEXT_MENU_MAIL,  0, &quot;Send as mail&quot;);</span>
+<span class="nc" id="L134">    }</span>
+
+    @Override public boolean onContextItemSelected(MenuItem item) {
+<span class="nc" id="L137">        final TextView textView = (TextView) findViewById(R.id.output);</span>
+<span class="nc" id="L138">        final CharSequence title = getTitle();</span>
+<span class="nc" id="L139">        final CharSequence content = textView.getText();</span>
+<span class="nc bnc" id="L140" title="All 3 branches missed.">        switch (item.getItemId()) {</span>
+        case CONTEXT_MENU_COPY:
+<span class="nc" id="L142">            return copyToClipboard(title, content);</span>
+        case CONTEXT_MENU_MAIL:
+<span class="nc" id="L144">            return mail(title, content);</span>
+        default:
+<span class="nc" id="L146">            return super.onContextItemSelected(item);</span>
+        }
+    }
+
+    private boolean copyToClipboard(CharSequence title, CharSequence content) {
+<span class="nc" id="L151">        final ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);</span>
+<span class="nc" id="L152">        clipboard.setText(title + &quot;\n\n&quot; + content);</span>
+<span class="nc" id="L153">        return true;</span>
+    }
+
+    private boolean mail(CharSequence title, CharSequence content) {
+<span class="nc" id="L157">        final Intent intent = new Intent(Intent.ACTION_SEND);</span>
+<span class="nc" id="L158">        intent.setType(&quot;text/plain&quot;);</span>
+<span class="nc" id="L159">        intent.putExtra(Intent.EXTRA_SUBJECT, &quot;Dalvik Explorer &quot; + Utils.appVersion(this) + &quot;: &quot; + title);</span>
+<span class="nc" id="L160">        intent.putExtra(Intent.EXTRA_TEXT, content);</span>
+<span class="nc" id="L161">        startActivity(intent);</span>
+<span class="nc" id="L162">        return true;</span>
+    }
+
+    public void setSearchString(String needle) {
+<span class="nc" id="L166">        clearSearch();</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (needle.length() == 0) {</span>
+<span class="nc" id="L168">            return;</span>
+        }
+<span class="nc" id="L170">        final TextView textView = (TextView) findViewById(R.id.output);</span>
+<span class="nc" id="L171">        Spannable spannable = (Spannable) textView.getText();</span>
+<span class="nc" id="L172">        String haystack = spannable.toString();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        for (int index = 0; index != -1; ) {</span>
+<span class="nc" id="L174">            index = haystack.indexOf(needle, index);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">            if (index != -1) {</span>
+<span class="nc" id="L176">                spannable.setSpan(new BackgroundColorSpan(0xff337733), index, index + needle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);</span>
+<span class="nc" id="L177">                index += needle.length();</span>
+            }
+        }
+<span class="nc" id="L180">    }</span>
+
+    public void clearSearch() {
+<span class="nc" id="L183">        final TextView textView = (TextView) findViewById(R.id.output);</span>
+<span class="nc" id="L184">        SpannableString spannable = (SpannableString) textView.getText();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        for (Object o : spannable.getSpans(0, spannable.length() - 1, BackgroundColorSpan.class)) {</span>
+<span class="nc" id="L186">            spannable.removeSpan(o);</span>
+        }
+<span class="nc" id="L188">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span>Generated by the Android Gradle plugin 3.5.3</div></body></html>

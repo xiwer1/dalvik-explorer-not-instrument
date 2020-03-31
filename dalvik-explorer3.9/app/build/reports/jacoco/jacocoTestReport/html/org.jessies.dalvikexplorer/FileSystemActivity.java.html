@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileSystemActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">FileSystemActivity.java</span></div><h1>FileSystemActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+<span class="fc" id="L15">public class FileSystemActivity extends BetterListActivity {</span>
+    private static class FileListItem implements BetterArrayAdapter.Subtitleable {
+        private final File file;
+        private final String label;
+        
+<span class="fc" id="L20">        private FileListItem(File file, String label) {</span>
+<span class="fc" id="L21">            this.file = file;</span>
+<span class="fc" id="L22">            this.label = label;</span>
+<span class="fc" id="L23">        }</span>
+        
+        private FileListItem(File file) {
+<span class="fc" id="L26">            this(file, makeLabel(file));</span>
+<span class="fc" id="L27">        }</span>
+        
+        private static String makeLabel(File file) {
+<span class="fc" id="L30">            String result = file.getName();</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">            return file.isDirectory() ? result + &quot;/&quot; : result;</span>
+        }
+        
+        @Override public String toString() {
+<span class="fc" id="L35">            return label;</span>
+        }
+        
+        public String toSubtitle() {
+<span class="fc" id="L39">            return Utils.prettySize(file.length());</span>
+        }
+    }
+    
+    @Override public void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L44">        super.onCreate(savedInstanceState);</span>
+        
+<span class="fc" id="L46">        String path = getIntent().getStringExtra(&quot;org.jessies.dalvikexplorer.Path&quot;);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (path == null) {</span>
+<span class="nc" id="L48">            path = &quot;/&quot;;</span>
+        }
+        
+<span class="fc" id="L51">        setListAdapter(new BetterArrayAdapter&lt;FileListItem&gt;(this, directoryItems(path), true));</span>
+<span class="fc" id="L52">        setTitle(path + &quot; (&quot; + getListAdapter().getCount() + &quot;)&quot;);</span>
+<span class="fc" id="L53">    }</span>
+    
+    private List&lt;FileListItem&gt; directoryItems(String path) {
+<span class="fc" id="L56">        File[] files = new File(path).listFiles();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (files == null) {</span>
+            // Returning null is how the retarded java.io.File API reports failure.
+<span class="fc" id="L59">            Toast.makeText(this, &quot;Couldn't list directory '&quot; + path + &quot;'&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L60">            finish();</span>
+<span class="fc" id="L61">            return Collections.emptyList();</span>
+        }
+        
+<span class="fc" id="L64">        Arrays.sort(files);</span>
+        
+<span class="fc" id="L66">        ArrayList&lt;FileListItem&gt; result = new ArrayList&lt;FileListItem&gt;();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (File file : files) {</span>
+<span class="fc" id="L68">            result.add(new FileListItem(file));</span>
+        }
+<span class="fc" id="L70">        return result;</span>
+    }
+    
+    @Override protected void onListItemClick(ListView l, View v, int position, long id) {
+<span class="fc" id="L74">        final FileListItem item = (FileListItem) l.getAdapter().getItem(position);</span>
+<span class="fc" id="L75">        final File child = item.file;</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        final Intent intent = new Intent(this, child.isDirectory() ? FileSystemActivity.class : FileViewerActivity.class);</span>
+<span class="fc" id="L77">        intent.putExtra(&quot;org.jessies.dalvikexplorer.Path&quot;, child.toString());</span>
+<span class="fc" id="L78">        startActivity(intent);</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

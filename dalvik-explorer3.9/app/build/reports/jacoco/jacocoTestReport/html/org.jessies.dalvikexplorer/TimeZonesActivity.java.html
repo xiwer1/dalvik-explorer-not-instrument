@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeZonesActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">TimeZonesActivity.java</span></div><h1>TimeZonesActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+
+<span class="fc" id="L12">public class TimeZonesActivity extends BetterListActivity {</span>
+    private static class TimeZoneListItem implements BetterArrayAdapter.Subtitleable {
+        private final TimeZone timeZone;
+        
+<span class="fc" id="L16">        private TimeZoneListItem(TimeZone timeZone) {</span>
+<span class="fc" id="L17">            this.timeZone = timeZone;</span>
+<span class="fc" id="L18">        }</span>
+        
+        @Override public String toString() {
+<span class="fc" id="L21">            String result = timeZone.getID();</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            if (timeZone.equals(TimeZone.getDefault())) {</span>
+<span class="fc" id="L23">                result += &quot; (default)&quot;;</span>
+            }
+<span class="fc" id="L25">            return result;</span>
+        }
+        
+        public String toSubtitle() {
+<span class="fc" id="L29">            String result = &quot;UTC&quot; + Utils.offsetString(timeZone.getRawOffset(), true, false);</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            if (timeZone.useDaylightTime()) {</span>
+<span class="fc" id="L31">                result += &quot; / DST &quot; + Utils.offsetString(timeZone.getDSTSavings(), false, true);</span>
+                //String.format(Locale.US, &quot; / DST %+d minutes&quot;, timeZone.getDSTSavings()/1000/60);
+            }
+<span class="fc" id="L34">            return result;</span>
+        }
+    }
+        
+    @Override public void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L39">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L40">        updateTimeZones();</span>
+<span class="fc" id="L41">    }</span>
+    
+    private void updateTimeZones() {
+<span class="fc" id="L44">        final List&lt;TimeZoneListItem&gt; timeZones = gatherTimeZones();</span>
+<span class="fc" id="L45">        setListAdapter(new BetterArrayAdapter&lt;TimeZoneListItem&gt;(this, timeZones, true));</span>
+<span class="fc" id="L46">        setTitle(&quot;Time Zones (&quot; + timeZones.size() + &quot;)&quot;);</span>
+<span class="fc" id="L47">    }</span>
+    
+    // The system's default time zone might have changed while we slept.
+    @Override protected void onResume() {
+<span class="fc" id="L51">        super.onResume();</span>
+<span class="fc" id="L52">        updateTimeZones();</span>
+<span class="fc" id="L53">    }</span>
+    
+    @Override protected void onListItemClick(ListView l, View v, int position, long id) {
+<span class="fc" id="L56">        final Intent intent = new Intent(this, TimeZoneActivity.class);</span>
+<span class="fc" id="L57">        final TimeZoneListItem item = (TimeZoneListItem) l.getAdapter().getItem(position);</span>
+<span class="fc" id="L58">        intent.putExtra(&quot;org.jessies.dalvikexplorer.TimeZone&quot;, item.timeZone.getID());</span>
+<span class="fc" id="L59">        startActivity(intent);</span>
+<span class="fc" id="L60">    }</span>
+    
+    private static List&lt;TimeZoneListItem&gt; gatherTimeZones() {
+<span class="fc" id="L63">        final String[] availableIds = TimeZone.getAvailableIDs();</span>
+<span class="fc" id="L64">        final TimeZone defaultTimeZone = TimeZone.getDefault();</span>
+        // Put the default time zone at the top of the list...
+<span class="fc" id="L66">        final List&lt;TimeZoneListItem&gt; result = new ArrayList&lt;TimeZoneListItem&gt;(availableIds.length);</span>
+<span class="fc" id="L67">        result.add(new TimeZoneListItem(defaultTimeZone));</span>
+        // ...followed by all the others.
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (String id : availableIds) {</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if (Thread.currentThread().isInterrupted()) return null;</span>
+<span class="fc" id="L71">            final TimeZone timeZone = TimeZone.getTimeZone(id);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">            if (!timeZone.equals(defaultTimeZone)) {</span>
+<span class="fc" id="L73">                result.add(new TimeZoneListItem(timeZone));</span>
+            }
+        }
+<span class="fc" id="L76">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

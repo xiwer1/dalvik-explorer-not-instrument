@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LocaleActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debugAndroidTest</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">LocaleActivity.java</span></div><h1>LocaleActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import java.text.BreakIterator;
+import java.text.Collator;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Locale;
+import java.util.MissingResourceException;
+
+<span class="nc" id="L18">public class LocaleActivity extends TextViewActivity {</span>
+  protected String extraName() {
+<span class="nc" id="L20">    return &quot;org.jessies.dalvikexplorer.Locale&quot;;</span>
+  }
+
+  protected CharSequence title(String localeName) {
+<span class="nc" id="L24">    return &quot;Locale \&quot;&quot; + localeName + &quot;\&quot;&quot;;</span>
+  }
+
+  protected String content(String localeName) {
+<span class="nc" id="L28">    return describeLocale(localeName);</span>
+  }
+
+  private static Locale localeByName(String name) {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    if (name.length() == 0) {</span>
+<span class="nc" id="L33">      return new Locale(&quot;&quot;, &quot;&quot;, &quot;&quot;);</span>
+    }
+
+<span class="nc" id="L36">    int languageEnd = name.indexOf('_');</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">    if (languageEnd == -1) {</span>
+<span class="nc" id="L38">      return new Locale(name, &quot;&quot;, &quot;&quot;);</span>
+    }
+
+<span class="nc" id="L41">    String language = name.substring(0, languageEnd);</span>
+<span class="nc" id="L42">    name = name.substring(languageEnd + 1);</span>
+
+<span class="nc" id="L44">    int countryEnd = name.indexOf('_');</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">    if (countryEnd == -1) {</span>
+<span class="nc" id="L46">      return new Locale(language, name, &quot;&quot;);</span>
+    }
+
+<span class="nc" id="L49">    String country = name.substring(0, countryEnd);</span>
+<span class="nc" id="L50">    String variant = name.substring(countryEnd + 1);</span>
+
+<span class="nc" id="L52">    return new Locale(language, country, variant);</span>
+  }
+
+  static String describeLocale(String name) {
+<span class="nc" id="L56">    final StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L57">    result.append(&quot;&lt;html&gt;&quot;);</span>
+
+<span class="nc" id="L59">    final Locale locale = localeByName(name);</span>
+
+<span class="nc" id="L61">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L62">    append(result, &quot;Display Name&quot;, locale.getDisplayName());</span>
+<span class="nc" id="L63">    append(result, &quot;Localized Display Name&quot;, locale.getDisplayName(locale));</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">    if (locale.getLanguage().length() &gt; 0) {</span>
+<span class="nc" id="L66">      String iso3Language = &quot;(not available)&quot;;</span>
+      try {
+<span class="nc" id="L68">        iso3Language = locale.getISO3Language();</span>
+<span class="nc" id="L69">      } catch (MissingResourceException ignored) {</span>
+<span class="nc" id="L70">      }</span>
+
+<span class="nc" id="L72">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L73">      append(result, &quot;Display Language&quot;, locale.getDisplayLanguage());</span>
+<span class="nc" id="L74">      append(result, &quot;Localized Display Language&quot;, locale.getDisplayLanguage(locale));</span>
+<span class="nc" id="L75">      append(result, &quot;2-Letter Language Code&quot;, locale.getLanguage());</span>
+<span class="nc" id="L76">      append(result, &quot;3-Letter Language Code&quot;, iso3Language);</span>
+    }
+<span class="nc bnc" id="L78" title="All 2 branches missed.">    if (locale.getCountry().length() &gt; 0) {</span>
+<span class="nc" id="L79">      String iso3Country = &quot;(not available)&quot;;</span>
+      try {
+<span class="nc" id="L81">        iso3Country = locale.getISO3Country();</span>
+<span class="nc" id="L82">      } catch (MissingResourceException ignored) {</span>
+<span class="nc" id="L83">      }</span>
+
+<span class="nc" id="L85">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L86">      append(result, &quot;Display Country&quot;, locale.getDisplayCountry());</span>
+<span class="nc" id="L87">      append(result, &quot;Localized Display Country&quot;, locale.getDisplayCountry(locale));</span>
+<span class="nc" id="L88">      append(result, &quot;2-Letter Country Code&quot;, locale.getCountry());</span>
+<span class="nc" id="L89">      append(result, &quot;3-Letter Country Code&quot;, iso3Country);</span>
+    }
+<span class="nc bnc" id="L91" title="All 2 branches missed.">    if (locale.getVariant().length() &gt; 0) {</span>
+<span class="nc" id="L92">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L93">      append(result, &quot;Display Variant&quot;, locale.getDisplayVariant());</span>
+<span class="nc" id="L94">      append(result, &quot;Localized Display Variant&quot;, locale.getDisplayVariant(locale));</span>
+<span class="nc" id="L95">      append(result, &quot;Variant Code&quot;, locale.getVariant());</span>
+    }
+
+<span class="nc" id="L98">    result.append(&quot;&lt;p&gt;&lt;b&gt;Number Formatting&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L99">    describeNumberFormat(result, &quot;Decimal&quot;, NumberFormat.getInstance(locale), 1234.5, -1234.5);</span>
+<span class="nc" id="L100">    describeNumberFormat(result, &quot;Integer&quot;, NumberFormat.getIntegerInstance(locale), 1234, -1234);</span>
+<span class="nc" id="L101">    describeNumberFormat(result, &quot;Currency&quot;, NumberFormat.getCurrencyInstance(locale), 1234.5, -1234.5);</span>
+<span class="nc" id="L102">    describeNumberFormat(result, &quot;Percent&quot;, NumberFormat.getPercentInstance(locale), 12.3);</span>
+
+<span class="nc" id="L104">    boolean hasLocaleData = hasLocaleData();</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">    if (!hasLocaleData) {</span>
+<span class="nc" id="L107">      result.append(&quot;&lt;p&gt;&lt;b&gt;Decimal Format Symbols&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L108">      NumberFormat nf = NumberFormat.getInstance(locale);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">      if (nf instanceof DecimalFormat) {</span>
+<span class="nc" id="L110">        describeDecimalFormatSymbols(result, ((DecimalFormat) nf).getDecimalFormatSymbols());</span>
+      } else {
+<span class="nc" id="L112">        result.append(&quot;(Didn't expect &quot; + nf.getClass() + &quot;.)&quot;);</span>
+      }
+    }
+
+<span class="nc" id="L116">    Date now = new Date(); // FIXME: it might be more useful to always show a time in the afternoon, to make 24-hour patterns more obvious.</span>
+<span class="nc" id="L117">    result.append(&quot;&lt;p&gt;&lt;b&gt;Date/Time Formatting&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L118">    describeDateFormat(result, &quot;Full Date&quot;, DateFormat.getDateInstance(DateFormat.FULL, locale), now);</span>
+<span class="nc" id="L119">    describeDateFormat(result, &quot;Long Date&quot;, DateFormat.getDateInstance(DateFormat.LONG, locale), now);</span>
+<span class="nc" id="L120">    describeDateFormat(result, &quot;Medium Date&quot;, DateFormat.getDateInstance(DateFormat.MEDIUM, locale), now);</span>
+<span class="nc" id="L121">    describeDateFormat(result, &quot;Short Date&quot;, DateFormat.getDateInstance(DateFormat.SHORT, locale), now);</span>
+<span class="nc" id="L122">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L123">    describeDateFormat(result, &quot;Full Time&quot;, DateFormat.getTimeInstance(DateFormat.FULL, locale), now);</span>
+<span class="nc" id="L124">    describeDateFormat(result, &quot;Long Time&quot;, DateFormat.getTimeInstance(DateFormat.LONG, locale), now);</span>
+<span class="nc" id="L125">    describeDateFormat(result, &quot;Medium Time&quot;, DateFormat.getTimeInstance(DateFormat.MEDIUM, locale), now);</span>
+<span class="nc" id="L126">    describeDateFormat(result, &quot;Short Time&quot;, DateFormat.getTimeInstance(DateFormat.SHORT, locale), now);</span>
+<span class="nc" id="L127">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L128">    describeDateFormat(result, &quot;Full Date/Time&quot;, DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, locale), now);</span>
+<span class="nc" id="L129">    describeDateFormat(result, &quot;Long Date/Time&quot;, DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale), now);</span>
+<span class="nc" id="L130">    describeDateFormat(result, &quot;Medium Date/Time&quot;, DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale), now);</span>
+<span class="nc" id="L131">    describeDateFormat(result, &quot;Short Date/Time&quot;, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale), now);</span>
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">    if (!hasLocaleData) {</span>
+<span class="nc" id="L134">      result.append(&quot;&lt;p&gt;&lt;b&gt;Date Format Symbols&lt;/b&gt;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L135">      DateFormat edf = DateFormat.getDateInstance(DateFormat.FULL, Locale.US);</span>
+<span class="nc" id="L136">      DateFormatSymbols edfs = ((SimpleDateFormat) edf).getDateFormatSymbols();</span>
+<span class="nc" id="L137">      DateFormat df = DateFormat.getDateInstance(DateFormat.FULL, locale);</span>
+<span class="nc" id="L138">      DateFormatSymbols dfs = ((SimpleDateFormat) df).getDateFormatSymbols();</span>
+<span class="nc" id="L139">      append(result, &quot;Local Pattern Chars&quot;, dfs.getLocalPatternChars());</span>
+<span class="nc" id="L140">      append(result, &quot;Am/pm&quot;, Arrays.toString(dfs.getAmPmStrings()));</span>
+<span class="nc" id="L141">      append(result, &quot;Eras&quot;, Arrays.toString(dfs.getEras()));</span>
+<span class="nc" id="L142">      append(result, &quot;Months&quot;, Arrays.toString(dfs.getMonths()));</span>
+<span class="nc" id="L143">      append(result, &quot;Short Months&quot;, Arrays.toString(dfs.getShortMonths()));</span>
+<span class="nc" id="L144">      append(result, &quot;Weekdays&quot;, Arrays.toString(dfs.getWeekdays()));</span>
+<span class="nc" id="L145">      append(result, &quot;Short Weekdays&quot;, Arrays.toString(dfs.getShortWeekdays()));</span>
+    }
+
+<span class="nc" id="L148">    result.append(&quot;&lt;p&gt;&lt;b&gt;Calendar&lt;/b&gt;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L149">    Calendar c = Calendar.getInstance(locale);</span>
+<span class="nc" id="L150">    int firstDayOfWeek = c.getFirstDayOfWeek();</span>
+<span class="nc" id="L151">    String firstDayOfWeekString = new DateFormatSymbols(locale).getWeekdays()[firstDayOfWeek];</span>
+<span class="nc" id="L152">    String englishFirstDayOfWeekString = new DateFormatSymbols(Locale.US).getWeekdays()[firstDayOfWeek];</span>
+<span class="nc" id="L153">    String firstDayOfWeekDetails = firstDayOfWeek + &quot; '&quot; + firstDayOfWeekString + &quot;'&quot;;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">    if (!englishFirstDayOfWeekString.equals(firstDayOfWeekString)) {</span>
+<span class="nc" id="L155">      firstDayOfWeekDetails += &quot; (&quot; + englishFirstDayOfWeekString + &quot;)&quot;;</span>
+    }
+<span class="nc" id="L157">    append(result, &quot;First Day of the Week&quot;, firstDayOfWeekDetails);</span>
+<span class="nc" id="L158">    append(result, &quot;Minimal Days in First Week&quot;, c.getMinimalDaysInFirstWeek());</span>
+
+    // If this locale specifies a country, check out the currency.
+    // Languages don't have currencies; countries do.
+<span class="nc bnc" id="L162" title="All 2 branches missed.">    if (!locale.getCountry().equals(&quot;&quot;)) {</span>
+<span class="nc" id="L163">      result.append(&quot;&lt;p&gt;&lt;b&gt;Currency&lt;/b&gt;&lt;p&gt;&quot;);</span>
+      try {
+<span class="nc" id="L165">        Currency currency = Currency.getInstance(locale);</span>
+<span class="nc" id="L166">        append(result, &quot;ISO 4217 Currency Code&quot;, currency.getCurrencyCode());</span>
+<span class="nc" id="L167">        append(result, &quot;Currency Symbol&quot;, unicodeString(currency.getSymbol(locale)) + &quot; (&quot; + currency.getSymbol(Locale.US) + &quot;)&quot;);</span>
+<span class="nc" id="L168">        append(result, &quot;Default Fraction Digits&quot;, currency.getDefaultFractionDigits());</span>
+<span class="nc" id="L169">      } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L170">        result.append(&quot;&lt;p&gt;(This version of Android is unable to return a Currency for this Locale.)&quot;);</span>
+<span class="nc" id="L171">      }</span>
+    }
+
+<span class="nc" id="L174">    result.append(&quot;&lt;p&gt;&lt;b&gt;Data Availability&lt;/b&gt;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L175">    appendAvailability(result, locale, &quot;BreakIterator&quot;, BreakIterator.class);</span>
+<span class="nc" id="L176">    appendAvailability(result, locale, &quot;Calendar&quot;, NumberFormat.class);</span>
+<span class="nc" id="L177">    appendAvailability(result, locale, &quot;Collator&quot;, Collator.class);</span>
+<span class="nc" id="L178">    appendAvailability(result, locale, &quot;DateFormat&quot;, DateFormat.class);</span>
+<span class="nc" id="L179">    appendAvailability(result, locale, &quot;DateFormatSymbols&quot;, DateFormatSymbols.class);</span>
+<span class="nc" id="L180">    appendAvailability(result, locale, &quot;DecimalFormatSymbols&quot;, DecimalFormatSymbols.class);</span>
+<span class="nc" id="L181">    appendAvailability(result, locale, &quot;NumberFormat&quot;, NumberFormat.class);</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">    if (hasLocaleData) {</span>
+<span class="nc" id="L184">      result.append(&quot;&lt;p&gt;&lt;b&gt;libcore.icu.LocaleData&lt;/b&gt;&quot;);</span>
+      try {
+<span class="nc" id="L186">        Object enUsData = getLocaleDataInstance(Locale.US);</span>
+<span class="nc" id="L187">        Object localeData = getLocaleDataInstance(locale);</span>
+        String[] previous;
+
+<span class="nc" id="L190">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L191">        describeStringArray(result, &quot;amPm&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L192">        describeStringArray(result, &quot;eras&quot;, enUsData, localeData, null);</span>
+
+<span class="nc" id="L194">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L195">        previous = describeStringArray(result, &quot;longMonthNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L196">        describeStringArray(result, &quot;longStandAloneMonthNames&quot;, enUsData, localeData, previous);</span>
+<span class="nc" id="L197">        previous = describeStringArray(result, &quot;shortMonthNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L198">        describeStringArray(result, &quot;shortStandAloneMonthNames&quot;, enUsData, localeData, previous);</span>
+<span class="nc" id="L199">        previous = describeStringArray(result, &quot;tinyMonthNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L200">        describeStringArray(result, &quot;tinyStandAloneMonthNames&quot;, enUsData, localeData, previous);</span>
+
+<span class="nc" id="L202">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L203">        previous = describeStringArray(result, &quot;longWeekdayNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L204">        describeStringArray(result, &quot;longStandAloneWeekdayNames&quot;, enUsData, localeData, previous);</span>
+<span class="nc" id="L205">        previous = describeStringArray(result, &quot;shortWeekdayNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L206">        describeStringArray(result, &quot;shortStandAloneWeekdayNames&quot;, enUsData, localeData, previous);</span>
+<span class="nc" id="L207">        previous = describeStringArray(result, &quot;tinyWeekdayNames&quot;, enUsData, localeData, null);</span>
+<span class="nc" id="L208">        describeStringArray(result, &quot;tinyStandAloneWeekdayNames&quot;, enUsData, localeData, previous);</span>
+
+<span class="nc" id="L210">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L211">        describeString(result, &quot;yesterday&quot;, enUsData, localeData);</span>
+<span class="nc" id="L212">        describeString(result, &quot;today&quot;, enUsData, localeData);</span>
+<span class="nc" id="L213">        describeString(result, &quot;tomorrow&quot;, enUsData, localeData);</span>
+
+<span class="nc" id="L215">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L216">        describeString(result, &quot;timeFormat12&quot;, enUsData, localeData);</span>
+<span class="nc" id="L217">        describeString(result, &quot;timeFormat24&quot;, enUsData, localeData);</span>
+
+<span class="nc" id="L219">        result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L220">        describeChar(result, &quot;zeroDigit&quot;, enUsData, localeData);</span>
+<span class="nc" id="L221">        describeChar(result, &quot;decimalSeparator&quot;, enUsData, localeData);</span>
+<span class="nc" id="L222">        describeChar(result, &quot;groupingSeparator&quot;, enUsData, localeData);</span>
+<span class="nc" id="L223">        describeChar(result, &quot;patternSeparator&quot;, enUsData, localeData);</span>
+<span class="nc" id="L224">        describeChar(result, &quot;percent&quot;, enUsData, localeData);</span>
+<span class="nc" id="L225">        describeChar(result, &quot;perMill&quot;, enUsData, localeData);</span>
+<span class="nc" id="L226">        describeChar(result, &quot;monetarySeparator&quot;, enUsData, localeData);</span>
+<span class="nc" id="L227">        describeChar(result, &quot;minusSign&quot;, enUsData, localeData);</span>
+<span class="nc" id="L228">        describeString(result, &quot;exponentSeparator&quot;, enUsData, localeData);</span>
+<span class="nc" id="L229">        describeString(result, &quot;infinity&quot;, enUsData, localeData);</span>
+<span class="nc" id="L230">        describeString(result, &quot;NaN&quot;, enUsData, localeData);</span>
+
+<span class="nc" id="L232">      } catch (Exception ex) {</span>
+<span class="nc" id="L233">        result.append(&quot;(&quot; + ex.getClass().getSimpleName() + &quot; thrown: &quot; + ex.getMessage() + &quot;)&quot;);</span>
+<span class="nc" id="L234">        System.err.println(ex);</span>
+<span class="nc" id="L235">      }</span>
+    }
+
+<span class="nc" id="L238">    return result.toString();</span>
+  }
+
+  private static String[] describeStringArray(StringBuilder sb, String fieldName, Object enUsData, Object localeData, String[] previous) {
+    try {
+<span class="nc" id="L243">      String[] values = (String[]) localeData.getClass().getField(fieldName).get(localeData);</span>
+
+<span class="nc bnc" id="L245" title="All 2 branches missed.">      if (Arrays.equals(values, previous)) {</span>
+<span class="nc" id="L246">        return values;</span>
+      }
+
+<span class="nc" id="L249">      sb.append(&quot;&lt;p&gt;&lt;b&gt;&quot;).append(fieldName).append(&quot;&lt;/b&gt;\n&quot;);</span>
+<span class="nc" id="L250">      String[] enUsValues = (String[]) localeData.getClass().getField(fieldName).get(enUsData);</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">      for (int i = 0; i &lt; values.length; ++i) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        if (enUsValues[i].length() == 0) {</span>
+<span class="nc" id="L253">          continue; // Java's weekday names array has an empty first element.</span>
+        }
+<span class="nc" id="L255">        sb.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;);</span>
+<span class="nc" id="L256">        sb.append(values[i]);</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (!values[i].equals(enUsValues[i])) {</span>
+<span class="nc" id="L258">          sb.append(&quot;  (&quot; + enUsValues[i] + &quot;)&quot;);</span>
+        }
+      }
+<span class="nc" id="L261">      return values;</span>
+<span class="nc" id="L262">    } catch (Exception ignored) {</span>
+<span class="nc" id="L263">      sb.append(&quot;&lt;p&gt;&lt;b&gt;&quot;).append(fieldName).append(&quot;&lt;/b&gt;: &lt;font color='red'&gt;missing&lt;/font&gt;&quot;);</span>
+<span class="nc" id="L264">      return null;</span>
+    }
+  }
+
+  private static void describeString(StringBuilder sb, String fieldName, Object enUsData, Object localeData) {
+<span class="nc" id="L269">    String valueText = &quot;&lt;font color='red'&gt;missing&lt;/font&gt;&quot;;</span>
+    try {
+<span class="nc" id="L271">      valueText = unicodeString((String) localeData.getClass().getField(fieldName).get(localeData));</span>
+<span class="nc" id="L272">    } catch (Exception ignored) {</span>
+<span class="nc" id="L273">    }</span>
+<span class="nc" id="L274">    append(sb, fieldName, valueText);</span>
+<span class="nc" id="L275">  }</span>
+
+  private static void describeChar(StringBuilder sb, String fieldName, Object enUsData, Object localeData) {
+<span class="nc" id="L278">    String valueText = &quot;&lt;font color='red'&gt;missing&lt;/font&gt;&quot;;</span>
+    try {
+<span class="nc" id="L280">      valueText = unicodeString(localeData.getClass().getField(fieldName).getChar(localeData));</span>
+<span class="nc" id="L281">    } catch (Exception ignored) {</span>
+<span class="nc" id="L282">    }</span>
+<span class="nc" id="L283">    append(sb, fieldName, valueText);</span>
+<span class="nc" id="L284">  }</span>
+
+  private static Object getLocaleDataInstance(Locale locale) {
+    try {
+<span class="nc" id="L288">      return localeDataClass().getMethod(&quot;get&quot;, Locale.class).invoke(null, locale);</span>
+<span class="nc" id="L289">    } catch (Exception ex) {</span>
+<span class="nc" id="L290">      throw new RuntimeException(ex);</span>
+    }
+  }
+
+  private static boolean hasLocaleData() {
+<span class="nc bnc" id="L295" title="All 2 branches missed.">    return localeDataClass() != null;</span>
+  }
+
+  private static Class&lt;?&gt; localeDataClass() {
+    try {
+<span class="nc" id="L300">      return Class.forName(&quot;libcore.icu.LocaleData&quot;);</span>
+<span class="nc" id="L301">    } catch (Exception ignored) {</span>
+<span class="nc" id="L302">      return null;</span>
+    }
+  }
+
+  private static String unicodeString(char ch) {
+<span class="nc" id="L307">    return unicodeString(Character.toString(ch));</span>
+  }
+
+  private static String unicodeString(String s) {
+<span class="nc bnc" id="L311" title="All 2 branches missed.">    if (s.length() &gt; 1) {</span>
+      // For actual text (like the Arabic NaN), this isn't obviously useful.
+<span class="nc" id="L313">      return s;</span>
+    }
+<span class="nc bnc" id="L315" title="All 2 branches missed.">    if (!containsNonAscii(s)) {</span>
+      // If there are only ASCII characters, don't belabor the point.
+<span class="nc" id="L317">      return s;</span>
+    }
+<span class="nc" id="L319">    StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L320">    sb.append(s);</span>
+<span class="nc" id="L321">    sb.append(&quot;  (&quot;);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">    for (int i = 0; i &lt; s.length(); ++i) {</span>
+<span class="nc" id="L323">      sb.append(String.format(&quot;U+%04x&quot;, (int) s.charAt(i)));</span>
+    }
+<span class="nc" id="L325">    sb.append(&quot;)&quot;);</span>
+<span class="nc" id="L326">    return sb.toString();</span>
+  }
+
+  private static boolean containsNonAscii(String s) {
+<span class="nc bnc" id="L330" title="All 2 branches missed.">    for (int i = 0; i &lt; s.length(); ++i) {</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">      if (s.charAt(i) &gt; 0x7f) {</span>
+<span class="nc" id="L332">        return true;</span>
+      }
+    }
+<span class="nc" id="L335">    return false;</span>
+  }
+
+  private static void appendAvailability(StringBuilder result, Locale locale, String name, Class&lt;?&gt; c) {
+<span class="nc" id="L339">    String state = &quot;unknown&quot;;</span>
+    try {
+<span class="nc" id="L341">      Locale[] locales = (Locale[]) c.getMethod(&quot;getAvailableLocales&quot;).invoke(null);</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">      state = Arrays.asList(locales).contains(locale) ? &quot;present&quot; : &quot;missing&quot;;</span>
+<span class="nc" id="L343">    } catch (Exception ex) {</span>
+      // DateFormatSymbols.getAvailableLocales and DecimalFormatSymbols.getAvailableLocales weren't added until Java 6.
+<span class="nc" id="L345">    }</span>
+<span class="nc" id="L346">    append(result, name, state);</span>
+<span class="nc" id="L347">  }</span>
+
+  private static void describeDecimalFormatSymbols(StringBuilder result, DecimalFormatSymbols dfs) {
+<span class="nc" id="L350">    result.append(&quot;Currency Symbol: &quot; + unicodeString(dfs.getCurrencySymbol()) + &quot;\n&quot;);</span>
+<span class="nc" id="L351">    result.append(&quot;International Currency Symbol: &quot; + unicodeString(dfs.getInternationalCurrencySymbol()) + &quot;\n&quot;);</span>
+<span class="nc" id="L352">    result.append(&quot;&lt;p&gt;&quot;);</span>
+
+<span class="nc" id="L354">    result.append(&quot;Digit: &quot; + unicodeString(dfs.getDigit()) + &quot;\n&quot;);</span>
+<span class="nc" id="L355">    result.append(&quot;Pattern Separator: &quot; + unicodeString(dfs.getPatternSeparator()) + &quot;\n&quot;);</span>
+<span class="nc" id="L356">    result.append(&quot;&lt;p&gt;&quot;);</span>
+
+<span class="nc" id="L358">    result.append(&quot;Decimal Separator: &quot; + unicodeString(dfs.getDecimalSeparator()) + &quot;\n&quot;);</span>
+<span class="nc" id="L359">    result.append(&quot;Monetary Decimal Separator: &quot; + unicodeString(dfs.getMonetaryDecimalSeparator()) + &quot;\n&quot;);</span>
+    // 1.6: result.append(&quot;Exponent Separator: &quot; + dfs.getExponentSeparator() + &quot;\n&quot;);
+<span class="nc" id="L361">    result.append(&quot;Grouping Separator: &quot; + unicodeString(dfs.getGroupingSeparator()) + &quot;\n&quot;);</span>
+
+<span class="nc" id="L363">    result.append(&quot;Infinity: &quot; + unicodeString(dfs.getInfinity()) + &quot;\n&quot;);</span>
+<span class="nc" id="L364">    result.append(&quot;Minus Sign: &quot; + unicodeString(dfs.getMinusSign()) + &quot;\n&quot;);</span>
+<span class="nc" id="L365">    result.append(&quot;NaN: &quot; + unicodeString(dfs.getNaN()) + &quot;\n&quot;);</span>
+<span class="nc" id="L366">    result.append(&quot;Percent: &quot; + unicodeString(dfs.getPercent()) + &quot;\n&quot;);</span>
+<span class="nc" id="L367">    result.append(&quot;Per Mille: &quot; + unicodeString(dfs.getPerMill()) + &quot;\n&quot;);</span>
+<span class="nc" id="L368">    result.append(&quot;Zero Digit: &quot; + unicodeString(dfs.getZeroDigit()) + &quot;\n&quot;);</span>
+<span class="nc" id="L369">    StringBuilder digits = new StringBuilder();</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">    for (int i = 0; i &lt;= 9; ++i) {</span>
+<span class="nc" id="L371">      digits.append((char) (dfs.getZeroDigit() + i));</span>
+    }
+<span class="nc" id="L373">    result.append(&quot;Digits: &quot; + digits.toString() + &quot;\n&quot;);</span>
+<span class="nc" id="L374">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L375">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L376">  }</span>
+
+  private static void describeDateFormat(StringBuilder result, String description, DateFormat dateFormat, Date when) {
+<span class="nc bnc" id="L379" title="All 2 branches missed.">    if (dateFormat instanceof SimpleDateFormat) {</span>
+<span class="nc" id="L380">      SimpleDateFormat sdf = (SimpleDateFormat) dateFormat;</span>
+<span class="nc" id="L381">      result.append(&quot;&lt;p&gt;&lt;b&gt;&quot; + description + &quot;&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L382">      result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot; + sdf.toPattern());</span>
+<span class="nc" id="L383">      result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot; + sdf.format(when));</span>
+    }
+<span class="nc" id="L385">  }</span>
+
+  private static void describeNumberFormat(StringBuilder result, String description, NumberFormat numberFormat, Number... values) {
+<span class="nc bnc" id="L388" title="All 2 branches missed.">    if (numberFormat instanceof DecimalFormat) {</span>
+<span class="nc" id="L389">      DecimalFormat df = (DecimalFormat) numberFormat;</span>
+<span class="nc" id="L390">      result.append(&quot;&lt;p&gt;&lt;b&gt;&quot; + description + &quot;&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L391">      result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot; + df.toPattern());</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">      for (Number value : values) {</span>
+<span class="nc" id="L393">        result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot; + df.format(value));</span>
+      }
+    }
+<span class="nc" id="L396">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span>Generated by the Android Gradle plugin 3.5.3</div></body></html>

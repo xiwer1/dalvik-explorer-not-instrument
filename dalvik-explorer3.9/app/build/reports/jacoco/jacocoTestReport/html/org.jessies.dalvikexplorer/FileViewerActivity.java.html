@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileViewerActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">FileViewerActivity.java</span></div><h1>FileViewerActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URLConnection;
+
+<span class="fc" id="L18">public class FileViewerActivity extends TextViewActivity {</span>
+    private static final int CONTEXT_MENU_VIEW = 2;
+
+    protected String extraName() {
+<span class="fc" id="L22">        return &quot;org.jessies.dalvikexplorer.Path&quot;;</span>
+    }
+
+    protected CharSequence title(String path) {
+<span class="fc" id="L26">        return path;</span>
+    }
+
+    protected String content(String path) {
+<span class="fc" id="L30">        return readFile(path);</span>
+    }
+
+    private String readFile(String path) {
+<span class="fc" id="L34">        StringBuilder result = new StringBuilder();</span>
+        try {
+<span class="fc" id="L36">            BufferedReader in = new BufferedReader(new FileReader(path));</span>
+            String line;
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            while ((line = in.readLine()) != null) {</span>
+<span class="fc" id="L39">                result.append(line);</span>
+<span class="fc" id="L40">                result.append('\n');</span>
+            }
+<span class="fc" id="L42">            in.close();</span>
+<span class="nc" id="L43">        } catch (IOException ex) {</span>
+<span class="nc" id="L44">            Toast.makeText(this, &quot;Couldn't read '&quot; + path + &quot;'&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L45">            finish();</span>
+<span class="fc" id="L46">        }</span>
+<span class="fc" id="L47">        return result.toString();</span>
+    }
+
+    @Override public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+<span class="nc" id="L51">        super.onCreateContextMenu(menu, v, menuInfo);</span>
+<span class="nc" id="L52">        menu.add(0, CONTEXT_MENU_VIEW,  0, &quot;Send 'view' intent&quot;);</span>
+<span class="nc" id="L53">    }</span>
+
+    @Override public boolean onContextItemSelected(MenuItem item) {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        switch (item.getItemId()) {</span>
+        case CONTEXT_MENU_VIEW:
+<span class="nc" id="L58">            return sendViewIntent();</span>
+        default:
+<span class="nc" id="L60">            return super.onContextItemSelected(item);</span>
+        }
+    }
+
+    private boolean sendViewIntent() {
+<span class="nc" id="L65">        File file = new File(getExtraValue());</span>
+<span class="nc" id="L66">        Uri path = Uri.fromFile(file);</span>
+<span class="nc" id="L67">        String mimeType = URLConnection.guessContentTypeFromName(file.toString());</span>
+<span class="nc" id="L68">        Intent intent = new Intent(Intent.ACTION_VIEW);</span>
+<span class="nc" id="L69">        intent.setDataAndType(path, mimeType);</span>
+<span class="nc" id="L70">        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);</span>
+        try {
+<span class="nc" id="L72">            startActivity(intent);</span>
+<span class="nc" id="L73">        } catch (ActivityNotFoundException ex) {</span>
+<span class="nc" id="L74">            AlertDialog.Builder builder = new AlertDialog.Builder(this);</span>
+<span class="nc" id="L75">            builder.setTitle(&quot;View failed&quot;);</span>
+<span class="nc" id="L76">            builder.setMessage(&quot;No application responded.&quot;);</span>
+<span class="nc" id="L77">            builder.setPositiveButton(android.R.string.ok, null);</span>
+<span class="nc" id="L78">            builder.show();</span>
+<span class="nc" id="L79">        }</span>
+<span class="nc" id="L80">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

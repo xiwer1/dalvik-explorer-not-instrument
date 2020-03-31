@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeviceActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">DeviceActivity.java</span></div><h1>DeviceActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.graphics.Point;
+import android.os.Build;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.WindowManager;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+<span class="fc" id="L20">public class DeviceActivity extends TextViewActivity {</span>
+  protected CharSequence title(String unused) {
+<span class="fc" id="L22">    return &quot;Device Details&quot;;</span>
+  }
+
+  protected String content(String unused) {
+<span class="fc" id="L26">    return getDeviceDetailsAsString(this, getWindowManager());</span>
+  }
+
+  // sysconf _SC_NPROCESSORS_CONF and _SC_NPROCESSORS_ONLN have been broken
+  // in bionic for various different reasons. /proc parsing was broken until
+  // Gingerbread, and even then _SC_NPROCESSORS_CONF was broken because ARM
+  // kernels remove offline processors from both /proc/stat and /proc/cpuinfo
+  // unlike x86 ones; you need to look in /sys/devices/system/cpu to see all
+  // the processors. This should be fixed some time post-JB.
+  private static int countHardwareCores() {
+<span class="fc" id="L36">    int result = 0;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">    for (String file : new File(&quot;/sys/devices/system/cpu&quot;).list()) {</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">      if (file.matches(&quot;cpu[0-9]+&quot;)) {</span>
+<span class="fc" id="L39">        ++result;</span>
+      }
+    }
+<span class="fc" id="L42">    return result;</span>
+  }
+
+  private static int countEnabledCores() {
+<span class="fc" id="L46">    int count = 0;</span>
+<span class="fc" id="L47">    BufferedReader in = null;</span>
+    try {
+<span class="fc" id="L49">      in = new BufferedReader(new FileReader(&quot;/proc/stat&quot;));</span>
+      String line;
+<span class="fc bfc" id="L51" title="All 2 branches covered.">      while ((line = in.readLine()) != null) {</span>
+<span class="fc bfc" id="L52" title="All 4 branches covered.">        if (line.startsWith(&quot;cpu&quot;) &amp;&amp; !line.startsWith(&quot;cpu &quot;)) {</span>
+<span class="fc" id="L53">          ++count;</span>
+        }
+      }
+<span class="fc" id="L56">      return count;</span>
+<span class="nc" id="L57">    } catch (IOException ex) {</span>
+<span class="nc" id="L58">      return -1;</span>
+    } finally {
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">      if (in != null) {</span>
+        try {
+<span class="fc" id="L62">          in.close();</span>
+<span class="nc" id="L63">        } catch (IOException ignored) {</span>
+<span class="fc" id="L64">        }</span>
+      }
+    }
+  }
+
+  private static String valueForKey(String[] lines, String key) {
+    // If you touch this, test on ARM, MIPS, and x86.
+<span class="fc" id="L71">    Pattern p = Pattern.compile(&quot;(?i)&quot; + key + &quot;\t*: (.*)&quot;);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    for (String line : lines) {</span>
+<span class="fc" id="L73">      Matcher m = p.matcher(line);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">      if (m.matches()) {</span>
+<span class="fc" id="L75">        return m.group(1);</span>
+      }
+    }
+<span class="fc" id="L78">    return null;</span>
+  }
+
+  private static int numericValueForKey(String[] lines, String key) {
+<span class="fc" id="L82">    String value = valueForKey(lines, key);</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">    if (value == null) {</span>
+<span class="fc" id="L84">      return -1;</span>
+    }
+<span class="nc" id="L86">    int base = 10;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">    if (value.startsWith(&quot;0x&quot;)) {</span>
+<span class="nc" id="L88">      base = 16;</span>
+<span class="nc" id="L89">      value = value.substring(2);</span>
+    }
+    try {
+<span class="nc" id="L92">      return Integer.valueOf(value, base);</span>
+<span class="nc" id="L93">    } catch (NumberFormatException ex) {</span>
+<span class="nc" id="L94">      return -1;</span>
+    }
+  }
+
+  private static String decodeImplementer(int implementer) {
+    // From &quot;ETMIDR bit assignments&quot;.
+    // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ihi0014q/Bcfihfdj.html
+<span class="nc bnc" id="L101" title="All 2 branches missed.">    if (implementer == 0x41) {</span>
+<span class="nc" id="L102">      return &quot;ARM&quot;;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">    } else if (implementer == 0x44) {</span>
+<span class="nc" id="L104">      return &quot;Digital Equipment Corporation&quot;;</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">    } else if (implementer == 0x4d) {</span>
+<span class="nc" id="L106">      return &quot;Motorola&quot;;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">    } else if (implementer == 0x51) {</span>
+<span class="nc" id="L108">      return &quot;Qualcomm&quot;;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">    } else if (implementer == 0x56) {</span>
+<span class="nc" id="L110">      return &quot;Marvell&quot;;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    } else if (implementer == 0x69) {</span>
+<span class="nc" id="L112">      return &quot;Intel&quot;;</span>
+    } else {
+<span class="nc" id="L114">      return &quot;unknown (0x&quot; + Integer.toHexString(implementer) + &quot;)&quot;;</span>
+    }
+  }
+
+  private static String decodePartNumber(int part) {
+    // TODO: if different implementers don't get discrete ranges,
+    // we might need to test implementer here too.
+<span class="nc bnc" id="L121" title="All 2 branches missed.">    if (part == 0x920) {</span>
+<span class="nc" id="L122">      return &quot;ARM920&quot;;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">    } else if (part == 0x926) {</span>
+<span class="nc" id="L124">      return &quot;ARM926&quot;;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">    } else if (part == 0xa26) {</span>
+<span class="nc" id="L126">      return &quot;ARM1026&quot;;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">    } else if (part == 0xb02) {</span>
+<span class="nc" id="L128">      return &quot;ARM11mpcore&quot;;</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">    } else if (part == 0xb36) {</span>
+<span class="nc" id="L130">      return &quot;ARM1136&quot;;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">    } else if (part == 0xb56) {</span>
+<span class="nc" id="L132">      return &quot;ARM1156&quot;;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">    } else if (part == 0xb76) {</span>
+<span class="nc" id="L134">      return &quot;ARM1176&quot;;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">    } else if (part == 0xc05) {</span>
+<span class="nc" id="L136">      return &quot;Cortex-A5&quot;;</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">    } else if (part == 0xc07) {</span>
+<span class="nc" id="L138">      return &quot;Cortex-A7&quot;;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">    } else if (part == 0xc08) {</span>
+<span class="nc" id="L140">      return &quot;Cortex-A8&quot;;</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">    } else if (part == 0xc09) {</span>
+<span class="nc" id="L142">      return &quot;Cortex-A9&quot;;</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">    } else if (part == 0xc0f) {</span>
+<span class="nc" id="L144">      return &quot;Cortex-A15&quot;;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">    } else if (part == 0xc14) {</span>
+<span class="nc" id="L146">      return &quot;Cortex-R4&quot;;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">    } else if (part == 0xc15) {</span>
+<span class="nc" id="L148">      return &quot;Cortex-R5&quot;;</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">    } else if (part == 0xc20) {</span>
+<span class="nc" id="L150">      return &quot;Cortex-M0&quot;;</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">    } else if (part == 0xc21) {</span>
+<span class="nc" id="L152">      return &quot;Cortex-M1&quot;;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">    } else if (part == 0xc23) {</span>
+<span class="nc" id="L154">      return &quot;Cortex-M3&quot;;</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">    } else if (part == 0xc24) {</span>
+<span class="nc" id="L156">      return &quot;Cortex-M4&quot;;</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">    } else if (part == 0x00f) {</span>
+<span class="nc" id="L158">      return &quot;Snapdragon S1 (Scorpion)&quot;;</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">    } else if (part == 0x02d) {</span>
+<span class="nc" id="L160">      return &quot;Snapdragon S3 (Scorpion)&quot;;</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">    } else if (part == 0x04d) {</span>
+<span class="nc" id="L162">      return &quot;Snapdragon S4 Plus (Krait)&quot;;</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">    } else if (part == 0x06f) {</span>
+<span class="nc" id="L164">      return &quot;Snapdragon S4 Pro (Krait)&quot;;</span>
+    } else {
+<span class="nc" id="L166">      return &quot;unknown (0x&quot; + Integer.toHexString(part) + &quot;)&quot;;</span>
+    }
+  }
+
+  String getDeviceDetailsAsString(Activity context, WindowManager wm) {
+<span class="fc" id="L171">    final StringBuilder result = new StringBuilder();</span>
+<span class="fc" id="L172">    result.append(&quot;&lt;html&gt;&quot;);</span>
+
+<span class="fc" id="L174">    String[] procCpuLines = Utils.readFile(&quot;/proc/cpuinfo&quot;).split(&quot;\n&quot;);</span>
+    // x86 kernels use &quot;processor&quot; as an integer to number sockets.
+    // They use &quot;model name&quot; to describe the processor.
+    // ARM kernels use &quot;Processor&quot; to describe the processor.
+<span class="fc" id="L178">    String processor = valueForKey(procCpuLines, &quot;model name&quot;);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">    if (processor == null) {</span>
+<span class="nc" id="L180">      processor = valueForKey(procCpuLines, &quot;Processor&quot;);</span>
+    }
+<span class="fc" id="L182">    append(result, &quot;Processor&quot;, processor);</span>
+
+<span class="fc" id="L184">    int hardwareCoreCount = countHardwareCores();</span>
+<span class="fc" id="L185">    int enabledCoreCount = countEnabledCores();</span>
+<span class="fc" id="L186">    String cores = Integer.toString(hardwareCoreCount);</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">    if (enabledCoreCount != hardwareCoreCount) {</span>
+<span class="nc" id="L188">      cores += &quot; (enabled: &quot; + enabledCoreCount + &quot;)&quot;;</span>
+    }
+<span class="fc" id="L190">    append(result, &quot;Cores&quot;, cores);</span>
+
+<span class="fc" id="L192">    result.append(&quot;&lt;p&gt;&quot;);</span>
+    try {
+<span class="fc" id="L194">      String minFrequency = Utils.readFile(&quot;/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq&quot;).trim();</span>
+<span class="fc" id="L195">      String maxFrequency = Utils.readFile(&quot;/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq&quot;).trim();</span>
+<span class="fc" id="L196">      long minFrequencyHz = Long.parseLong(minFrequency) * 1000L;</span>
+<span class="fc" id="L197">      long maxFrequencyHz = Long.parseLong(maxFrequency) * 1000L;</span>
+<span class="fc" id="L198">      append(result, &quot;CPU Speed&quot;, Utils.prettyHz(maxFrequencyHz) + &quot; (idles at &quot; + Utils.prettyHz(minFrequencyHz) + &quot;)&quot;);</span>
+<span class="nc" id="L199">    } catch (Exception unexpected) {</span>
+<span class="nc" id="L200">      result.append(&quot;(Unable to determine CPU frequencies.)&quot;);</span>
+<span class="fc" id="L201">    }</span>
+
+    // ARM-specific.
+<span class="fc" id="L204">    int implementer = numericValueForKey(procCpuLines, &quot;CPU implementer&quot;);</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">    if (implementer != -1) {</span>
+<span class="nc" id="L206">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L207">      append(result, &quot;CPU Implementer&quot;, decodeImplementer(implementer));</span>
+<span class="nc" id="L208">      append(result, &quot;CPU Part&quot;, decodePartNumber(numericValueForKey(procCpuLines, &quot;CPU part&quot;)));</span>
+      // These two are included in the kernel's formatting of &quot;Processor&quot;.
+      //result.append(&quot;CPU Architecture: &quot; + numericValueForKey(procCpuLines, &quot;CPU architecture&quot;) + &quot;\n&quot;);
+      //result.append(&quot;CPU Revision: &quot; + numericValueForKey(procCpuLines, &quot;CPU revision&quot;) + &quot;\n&quot;);
+<span class="nc" id="L212">      append(result, &quot;CPU Variant&quot;, numericValueForKey(procCpuLines, &quot;CPU variant&quot;));</span>
+<span class="nc" id="L213">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L214">      append(result, &quot;Hardware&quot;, valueForKey(procCpuLines, &quot;Hardware&quot;));</span>
+<span class="nc" id="L215">      append(result, &quot;Revision&quot;, valueForKey(procCpuLines, &quot;Revision&quot;));</span>
+<span class="nc" id="L216">      append(result, &quot;Serial&quot;, valueForKey(procCpuLines, &quot;Serial&quot;));</span>
+    }
+
+    // MIPS-specific.
+    // TODO: is &quot;CPU architecture&quot; ever more specific than &quot;MIPS&quot;?
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">    if (&quot;MIPS&quot;.equals(valueForKey(procCpuLines, &quot;CPU architecture&quot;))) {</span>
+<span class="nc" id="L222">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L223">      append(result, &quot;CPU Implementer&quot;, valueForKey(procCpuLines, &quot;CPU implementer&quot;));</span>
+<span class="nc" id="L224">      append(result, &quot;CPU Model&quot;, valueForKey(procCpuLines, &quot;cpu model&quot;));</span>
+<span class="nc" id="L225">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L226">      append(result, &quot;Hardware&quot;, valueForKey(procCpuLines, &quot;Hardware&quot;));</span>
+<span class="nc" id="L227">      append(result, &quot;Revision&quot;, valueForKey(procCpuLines, &quot;Revision&quot;));</span>
+<span class="nc" id="L228">      append(result, &quot;Serial&quot;, valueForKey(procCpuLines, &quot;Serial&quot;));</span>
+    }
+
+    // Intel-specific.
+<span class="fc" id="L232">    String cacheSize = valueForKey(procCpuLines, &quot;cache size&quot;);</span>
+<span class="fc" id="L233">    String addressSizes = valueForKey(procCpuLines, &quot;address sizes&quot;);</span>
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">    if (cacheSize != null) {</span>
+<span class="fc" id="L235">      result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="fc" id="L236">      append(result, &quot;Cache&quot;, cacheSize);</span>
+<span class="fc" id="L237">      append(result, &quot;Address Sizes&quot;, addressSizes);</span>
+    }
+
+<span class="fc" id="L240">    String features = valueForKey(procCpuLines, &quot;Features&quot;);</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">    if (features == null) {</span>
+<span class="fc" id="L242">      features = valueForKey(procCpuLines, &quot;flags&quot;);</span>
+    }
+<span class="fc" id="L244">    result.append(&quot;&lt;p&gt;&lt;b&gt;CPU Features&lt;/b&gt;\n&quot;);</span>
+<span class="fc" id="L245">    result.append(Utils.sortedStringOfStrings(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&quot;, features.split(&quot; &quot;)));</span>
+
+<span class="fc" id="L247">    MemInfo memInfo = readMemInfo();</span>
+<span class="fc" id="L248">    result.append(&quot;&lt;p&gt;&lt;b&gt;Memory&lt;/b&gt;\n&quot;);</span>
+<span class="fc" id="L249">    result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;Total: &quot; + Utils.prettySize(memInfo.total));</span>
+<span class="fc" id="L250">    result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;Used: &quot; + Utils.prettySize(memInfo.used));</span>
+<span class="fc" id="L251">    result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;Free: &quot; + Utils.prettySize(memInfo.free));</span>
+<span class="fc" id="L252">    result.append(&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;Buffers: &quot; + Utils.prettySize(memInfo.buffers));</span>
+
+    try {
+<span class="fc" id="L255">      ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);</span>
+<span class="fc" id="L256">      Method isLowRamDeviceMethod = ActivityManager.class.getMethod(&quot;isLowRamDevice&quot;);</span>
+<span class="fc" id="L257">      boolean isLowRamDevice = (Boolean) isLowRamDeviceMethod.invoke(activityManager);</span>
+<span class="fc" id="L258">      result.append(&quot;&lt;p&gt;&lt;b&gt;Is Low Memory Device:&lt;/b&gt; &quot; + isLowRamDevice);</span>
+<span class="nc" id="L259">    } catch (Exception ignored) {</span>
+<span class="fc" id="L260">    }</span>
+
+<span class="fc" id="L262">    Display display = wm.getDefaultDisplay();</span>
+<span class="fc" id="L263">    DisplayMetrics metrics = new DisplayMetrics();</span>
+<span class="fc" id="L264">    display.getMetrics(metrics);</span>
+<span class="fc" id="L265">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="fc" id="L266">    append(result, &quot;Screen Density&quot;, metrics.densityDpi + &quot;dpi (&quot; + metrics.density + &quot;x DIP)&quot;);</span>
+<span class="fc" id="L267">    append(result, &quot;Exact DPI&quot;, metrics.xdpi + &quot; x &quot; + metrics.ydpi);</span>
+<span class="fc" id="L268">    int widthPixels = metrics.widthPixels;</span>
+<span class="fc" id="L269">    int heightPixels = metrics.heightPixels;</span>
+    try {
+<span class="nc" id="L271">      widthPixels = (Integer) Display.class.getMethod(&quot;getRawWidth&quot;).invoke(display);</span>
+<span class="nc" id="L272">      heightPixels = (Integer) Display.class.getMethod(&quot;getRawHeight&quot;).invoke(display);</span>
+<span class="fc" id="L273">    } catch (Exception ignored) {</span>
+<span class="nc" id="L274">    }</span>
+    try {
+<span class="fc" id="L276">      Point realSize = new Point();</span>
+<span class="fc" id="L277">      Display.class.getMethod(&quot;getRealSize&quot;, Point.class).invoke(display, realSize);</span>
+<span class="fc" id="L278">      widthPixels = realSize.x;</span>
+<span class="fc" id="L279">      heightPixels = realSize.y;</span>
+<span class="nc" id="L280">    } catch (Exception ignored) {</span>
+<span class="fc" id="L281">    }</span>
+<span class="fc" id="L282">    append(result, &quot;Screen Size&quot;, widthPixels + &quot; x &quot; + heightPixels + &quot; pixels&quot;);</span>
+<span class="fc" id="L283">    double widthInches = widthPixels/metrics.xdpi;</span>
+<span class="fc" id="L284">    double heightInches = heightPixels/metrics.ydpi;</span>
+<span class="fc" id="L285">    double diagonalInches = Math.sqrt(widthInches*widthInches + heightInches*heightInches);</span>
+<span class="fc" id="L286">    append(result, &quot;Approximate Dimensions&quot;, String.format(&quot;%.1f\&quot; x %.1f\&quot; (%.1f\&quot; diagonal)&quot;, widthInches, heightInches, diagonalInches));</span>
+
+<span class="fc" id="L288">    return result.toString();</span>
+  }
+
+  private static String getFieldReflectively(Build build, String fieldName) {
+    try {
+<span class="nc" id="L293">      final Field field = Build.class.getField(fieldName);</span>
+<span class="nc" id="L294">      return field.get(build).toString();</span>
+<span class="nc" id="L295">    } catch (Exception ex) {</span>
+<span class="nc" id="L296">      return &quot;unknown&quot;;</span>
+    }
+  }
+
+<span class="fc" id="L300">  static class MemInfo {</span>
+    long total;
+    long used;
+    long free;
+    long buffers;
+  }
+
+  private static MemInfo readMemInfo() {
+<span class="fc" id="L308">    MemInfo result = new MemInfo();</span>
+<span class="fc" id="L309">    String[] lines = Utils.readLines(&quot;/proc/meminfo&quot;);</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">    for (String line : lines) {</span>
+<span class="fc" id="L311">      String[] fields = line.split(&quot; +&quot;);</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">      if (fields[0].equals(&quot;MemTotal:&quot;)) {</span>
+<span class="fc" id="L313">        result.total = Long.parseLong(fields[1]) * 1024;</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">      } else if (fields[0].equals(&quot;MemFree:&quot;)) {</span>
+<span class="fc" id="L315">        result.free = Long.parseLong(fields[1]) * 1024;</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">      } else if (fields[0].equals(&quot;Buffers:&quot;)) {</span>
+<span class="nc" id="L317">        result.buffers = Long.parseLong(fields[1]) * 1024;</span>
+      } else {
+        break;
+      }
+    }
+<span class="fc" id="L322">    result.used = result.total - result.free;</span>
+<span class="fc" id="L323">    return result;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

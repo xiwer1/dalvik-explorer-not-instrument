@@ -1,0 +1,38 @@
+{
+    "logs": [
+        {
+            "outputFile": "D:\\study\\Test\\GitHub\\dalvik-explorer3.9-timer\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
+            "map": [
+                {
+                    "source": "D:\\study\\Test\\GitHub\\dalvik-explorer3.9-timer\\app\\src\\main\\res\\values\\strings.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "52",
+                        "endOffsets": "103"
+                    }
+                },
+                {
+                    "source": "D:\\study\\Test\\GitHub\\dalvik-explorer3.9-timer\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "56",
+                        "endLines": "4",
+                        "endColumns": "12",
+                        "endOffsets": "122"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "108",
+                        "endLines": "4",
+                        "endColumns": "12",
+                        "endOffsets": "174"
+                    }
+                }
+            ]
+        }
+    ]
+}

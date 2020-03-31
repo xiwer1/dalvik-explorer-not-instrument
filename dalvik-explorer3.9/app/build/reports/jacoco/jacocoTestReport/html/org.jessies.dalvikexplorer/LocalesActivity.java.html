@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LocalesActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">LocalesActivity.java</span></div><h1>LocalesActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeSet;
+
+<span class="fc" id="L13">public class LocalesActivity extends BetterListActivity {</span>
+    @Override public void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L15">        super.onCreate(savedInstanceState);</span>
+
+<span class="fc" id="L17">        List&lt;LocaleListItem&gt; languages = gatherLanguages();</span>
+<span class="fc" id="L18">        setListAdapter(new BetterArrayAdapter&lt;LocaleListItem&gt;(this, languages, true));</span>
+<span class="fc" id="L19">        int languageCount = languages.size() - 1; // Don't count the extra entry for the default locale.</span>
+<span class="fc" id="L20">        setTitle(&quot;Languages (&quot; + languageCount + &quot;)&quot;);</span>
+<span class="fc" id="L21">    }</span>
+    
+    @Override protected void onListItemClick(ListView l, View v, int position, long id) {
+<span class="fc" id="L24">        final LocaleListItem item = (LocaleListItem) l.getAdapter().getItem(position);</span>
+<span class="fc" id="L25">        String languageName = item.locale().toString();</span>
+        final Intent intent;
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (languageName.contains(&quot;_&quot;)) {</span>
+<span class="fc" id="L28">            intent = new Intent(this, LocaleActivity.class);</span>
+<span class="fc" id="L29">            final String localeName = languageName.replace(&quot; (default)&quot;, &quot;&quot;);</span>
+<span class="fc" id="L30">            intent.putExtra(&quot;org.jessies.dalvikexplorer.Locale&quot;, localeName);</span>
+<span class="fc" id="L31">        } else {</span>
+<span class="fc" id="L32">            intent = new Intent(this, LocaleCountriesActivity.class);</span>
+<span class="fc" id="L33">            intent.putExtra(&quot;org.jessies.dalvikexplorer.Language&quot;, languageName);</span>
+        }
+<span class="fc" id="L35">        startActivity(intent);</span>
+<span class="fc" id="L36">    }</span>
+    
+    private static List&lt;LocaleListItem&gt; gatherLanguages() {
+<span class="fc" id="L39">        final Locale[] availableLocales = Locale.getAvailableLocales();</span>
+<span class="fc" id="L40">        final Locale defaultLocale = Locale.getDefault();</span>
+        // Put the default locale at the top of the list...
+<span class="fc" id="L42">        final ArrayList&lt;LocaleListItem&gt; result = new ArrayList&lt;LocaleListItem&gt;(availableLocales.length);</span>
+<span class="fc" id="L43">        result.add(new LocaleListItem(defaultLocale));</span>
+        // ...followed by all the distinct languages...
+<span class="fc" id="L45">        TreeSet&lt;String&gt; languages = new TreeSet&lt;String&gt;();</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (Locale locale : availableLocales) {</span>
+<span class="fc" id="L47">            languages.add(locale.getLanguage());</span>
+        }
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (String language : languages) {</span>
+<span class="fc" id="L50">            result.add(new LocaleListItem(new Locale(language)));</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

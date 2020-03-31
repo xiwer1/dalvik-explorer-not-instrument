@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeZoneActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debugAndroidTest</a> &gt; <a href="index.source.html" class="el_package">org.jessies.dalvikexplorer</a> &gt; <span class="el_source">TimeZoneActivity.java</span></div><h1>TimeZoneActivity.java</h1><pre class="source lang-java linenums">package org.jessies.dalvikexplorer;
+
+import android.util.TimeUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.TimeZone;
+
+<span class="nc" id="L17">public class TimeZoneActivity extends TextViewActivity {</span>
+  protected String extraName() {
+<span class="nc" id="L19">    return &quot;org.jessies.dalvikexplorer.TimeZone&quot;;</span>
+  }
+
+  protected CharSequence title(String timeZoneId) {
+<span class="nc" id="L23">    return &quot;Time Zone \&quot;&quot; + timeZoneId + &quot;\&quot;&quot;;</span>
+  }
+
+  protected String content(String timeZoneId) {
+<span class="nc" id="L27">    return describeTimeZone(timeZoneId);</span>
+  }
+
+  private String describeTimeZone(String id) {
+<span class="nc" id="L31">    final StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L32">    result.append(&quot;&lt;html&gt;&quot;);</span>
+
+<span class="nc" id="L34">    final TimeZone timeZone = TimeZone.getTimeZone(id);</span>
+<span class="nc" id="L35">    final Date now = new Date();</span>
+<span class="nc" id="L36">    final DateFormat iso8601 = new SimpleDateFormat(&quot;yyyy-MM-dd' 'HH:mm:ss Z (EEEE)&quot;, Locale.US);</span>
+
+<span class="nc" id="L38">    append(result, &quot;Long Display Name&quot;, timeZone.getDisplayName(false, TimeZone.LONG));</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (timeZone.useDaylightTime()) {</span>
+<span class="nc" id="L40">      append(result, &quot;Long Display Name (DST)&quot;, timeZone.getDisplayName(true, TimeZone.LONG));</span>
+    }
+
+<span class="nc" id="L43">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L44">    append(result, &quot;Short Display Name&quot;, timeZone.getDisplayName(false, TimeZone.SHORT));</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">    if (timeZone.useDaylightTime()) {</span>
+<span class="nc" id="L46">      append(result, &quot;Short Display Name (DST)&quot;, timeZone.getDisplayName(true, TimeZone.SHORT));</span>
+    }
+
+<span class="nc" id="L49">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L50">    iso8601.setTimeZone(TimeZone.getDefault());</span>
+<span class="nc" id="L51">    append(result, &quot;Time Here&quot;, iso8601.format(now));</span>
+<span class="nc" id="L52">    iso8601.setTimeZone(timeZone);</span>
+<span class="nc" id="L53">    append(result, &quot;Time There&quot;, iso8601.format(now));</span>
+
+<span class="nc" id="L55">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L56">    append(result, &quot;Raw Offset&quot;, &quot;UTC&quot; + Utils.offsetString(timeZone.getRawOffset(), true, true));</span>
+<span class="nc" id="L57">    append(result, &quot;Current Offset&quot;, &quot;UTC&quot; + Utils.offsetString(timeZone.getOffset(System.currentTimeMillis()), true, true));</span>
+
+<span class="nc" id="L59">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L60">    append(result, &quot;Uses DST&quot;, timeZone.useDaylightTime());</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">    if (timeZone.useDaylightTime()) {</span>
+<span class="nc" id="L62">      append(result, &quot;DST Savings&quot;, Utils.offsetString(timeZone.getDSTSavings(), false, true));</span>
+<span class="nc" id="L63">      append(result, &quot;In DST Now&quot;, timeZone.inDaylightTime(now));</span>
+    }
+
+<span class="nc" id="L66">    result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L67">    append(result, &quot;Source&quot;, &quot;tzdata&quot; + TimeUtils.getTimeZoneDatabaseVersion());</span>
+
+    // TODO: make this available in Android, and get it from there (falling back to our hard-coded copy).
+<span class="nc" id="L70">    InputStream is = getResources().openRawResource(R.raw.zone_tab);</span>
+    try {
+<span class="nc" id="L72">      BufferedReader reader = new BufferedReader(new InputStreamReader(is));</span>
+<span class="nc" id="L73">      boolean found = false;</span>
+      String line;
+<span class="nc bnc" id="L75" title="All 2 branches missed.">      while ((line = reader.readLine()) != null) {</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (line.contains(id)) {</span>
+<span class="nc" id="L77">          String[] fields = line.split(&quot;\t&quot;);</span>
+          // 0: country code
+          // 1: coordinates
+          // 2: id
+          // 3: comments
+<span class="nc bnc" id="L82" title="All 2 branches missed.">          if (!fields[2].equals(id)) {</span>
+<span class="nc" id="L83">            continue;</span>
+          }
+<span class="nc" id="L85">          String countryCode = fields[0];</span>
+<span class="nc" id="L86">          String country = new Locale(&quot;&quot;, countryCode).getDisplayCountry(Locale.getDefault());</span>
+<span class="nc" id="L87">          result.append(&quot;&lt;p&gt;&quot;);</span>
+<span class="nc" id="L88">          append(result, &quot;Country&quot;, countryCode + &quot; (&quot; + country + &quot;)&quot;);</span>
+<span class="nc" id="L89">          String iso6709Coordinates = fields[1];</span>
+          String dmsCoordinates;
+<span class="nc bnc" id="L91" title="All 2 branches missed.">          if (iso6709Coordinates.length() == 11) {</span>
+<span class="nc" id="L92">            dmsCoordinates = iso6709Coordinates.replaceAll(&quot;([+-])(\\d{2})(\\d{2})([+-])(\\d{3})(\\d{2})&quot;, &quot;$1$2\u00b0$3', $4$5\u00b0$6'&quot;);</span>
+          } else {
+<span class="nc" id="L94">            dmsCoordinates = iso6709Coordinates.replaceAll(&quot;([+-])(\\d{2})(\\d{2})(\\d{2})([+-])(\\d{3})(\\d{2})(\\d{2})&quot;, &quot;$1$2\u00b0$3'$4\&quot;, $5$6\u00b0$7'$8\&quot;&quot;);</span>
+          }
+<span class="nc" id="L96">          append(result, &quot;Coordinates&quot;, dmsCoordinates);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">          String notes = (fields.length &gt; 3) ? fields[3] : &quot;(no notes)&quot;;</span>
+<span class="nc" id="L98">          append(result, &quot;Notes&quot;, notes);</span>
+<span class="nc" id="L99">          found = true;</span>
+<span class="nc" id="L100">        }</span>
+      }
+<span class="nc bnc" id="L102" title="All 2 branches missed.">      if (!found) {</span>
+<span class="nc" id="L103">        result.append(&quot;&lt;p&gt;(Not found in zone.tab.)\n&quot;);</span>
+      }
+<span class="nc" id="L105">    } catch (IOException ex) {</span>
+<span class="nc" id="L106">      result.append(&quot;&lt;p&gt;(Failed to read zone.tab.)\n&quot;);</span>
+    } finally {
+<span class="nc" id="L108">      try {</span>
+<span class="nc" id="L109">        is.close();</span>
+<span class="nc" id="L110">      } catch (IOException ignored) {</span>
+<span class="nc" id="L111">      }</span>
+<span class="nc" id="L112">    }</span>
+
+    try {
+<span class="nc" id="L115">      describeTransitions(result, timeZone);</span>
+<span class="nc" id="L116">    } catch (Exception unexpected) {</span>
+<span class="nc" id="L117">      result.append(&quot;(Couldn't find transition data in &quot; + timeZone.getClass() + &quot;.)\n&quot;);</span>
+<span class="nc" id="L118">      unexpected.printStackTrace();</span>
+<span class="nc" id="L119">    }</span>
+
+<span class="nc" id="L121">    return result.toString();</span>
+  }
+
+  private static void describeTransitions(StringBuilder result, TimeZone tz) throws IllegalAccessException, NoSuchFieldException {
+<span class="nc" id="L125">    Class&lt;?&gt; zoneInfoClass = tz.getClass();</span>
+<span class="nc" id="L126">    Field mTransitionsField = zoneInfoClass.getDeclaredField(&quot;mTransitions&quot;);</span>
+<span class="nc" id="L127">    mTransitionsField.setAccessible(true);</span>
+<span class="nc" id="L128">    int[] mTransitions = (int[]) mTransitionsField.get(tz);</span>
+
+<span class="nc" id="L130">    long unixNow = System.currentTimeMillis() / 1000;</span>
+<span class="nc" id="L131">    boolean shownNow = false;</span>
+
+<span class="nc" id="L133">    DateFormat df = new SimpleDateFormat(&quot;yyyy-MM-dd' 'HH:mm:ss Z&quot;, Locale.US);</span>
+<span class="nc" id="L134">    df.setTimeZone(tz);</span>
+<span class="nc" id="L135">    DateFormat weekdayFormat = new SimpleDateFormat(&quot;EEEE&quot;, Locale.US);</span>
+<span class="nc" id="L136">    weekdayFormat.setTimeZone(tz);</span>
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">    if (mTransitions.length == 0) {</span>
+      // Some rare zones such as Africa/Bujumbura have never had a transition.
+<span class="nc" id="L140">      result.append(&quot;&lt;p&gt;(This zone has never had a transition.)\n&quot;);</span>
+    } else {
+<span class="nc" id="L142">      Formatter f = new Formatter(result);</span>
+<span class="nc" id="L143">      f.format(&quot;&lt;p&gt;&lt;b&gt;Transitions&lt;/b&gt;\n&quot;);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">      for (int i = 0; i &lt; mTransitions.length; ++i) {</span>
+<span class="nc" id="L145">        f.format(&quot;&lt;br&gt;&quot;);</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">        if (!shownNow &amp;&amp; mTransitions[i] &gt; unixNow) {</span>
+<span class="nc" id="L147">          f.format(&quot;&lt;br&gt;  -- now (%d) --&lt;br&gt;&lt;br&gt;&quot;, unixNow);</span>
+<span class="nc" id="L148">          shownNow = true;</span>
+        }
+<span class="nc" id="L150">        String fromTime = formatTime(df, mTransitions[i] - 1);</span>
+<span class="nc" id="L151">        String toTime = formatTime(df, mTransitions[i]);</span>
+<span class="nc" id="L152">        f.format(&quot;  %s ... %s (%d)&quot;, fromTime, toTime, mTransitions[i]);</span>
+
+<span class="nc" id="L154">        String weekday = weekdayFormat.format(new Date(1000L * mTransitions[i]));</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (!weekday.equals(&quot;Sunday&quot;)) {</span>
+<span class="nc" id="L156">          f.format(&quot; -- %s&quot;, weekday);</span>
+        }
+      }
+    }
+<span class="nc" id="L160">  }</span>
+
+  private static String formatTime(DateFormat df, int s) {
+<span class="nc" id="L163">    long ms = ((long) s) * 1000L;</span>
+<span class="nc" id="L164">    return df.format(new Date(ms));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span>Generated by the Android Gradle plugin 3.5.3</div></body></html>
